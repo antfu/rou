@@ -5,8 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Rou"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="350" Width="350" WindowStartupLocation="CenterScreen" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="{x:Null}" Loaded="Window_Loaded">
+    <Window.Effect>
+        <DropShadowEffect Opacity="0.7"/>
+    </Window.Effect>
     <Grid>
-        
+        <Ellipse x:Name="rouBack" Fill="#20000000" HorizontalAlignment="Center" Height="300" Margin="0"  VerticalAlignment="Center" Width="300" MouseDown="rouCenter_MouseDown"/>
+        <Canvas x:Name="cavans" HorizontalAlignment="Center" Height="300" Margin="0" VerticalAlignment="Center" Width="300">
+            <Path Fill="Cyan" Stroke="Black" Canvas.Left="0" Canvas.Top="25">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure StartPoint="1,24" IsClosed="True">
+                            <LineSegment Point="35,58"/>
+                            <ArcSegment Size="55,20" Point="59,48" SweepDirection="Clockwise"/>
+                            <LineSegment Point="59,0"/>
+                            <ArcSegment Size="80,80" Point="1,24" SweepDirection="Counterclockwise"/>
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
+        </Canvas>
     </Grid>
 </Window>
