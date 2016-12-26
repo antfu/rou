@@ -8,11 +8,19 @@ namespace Rou
 {
     public delegate void ActionChanged(Action sender);
 
+
     public abstract class Action
     {
+        public enum ActionType
+        {
+            Button,
+            Slide
+        }
+
         private string _text;
         private MaterialIconType _icon;
 
+        public ActionType Type { get; protected set; }
         public string Text
         {
             get
@@ -54,7 +62,7 @@ namespace Rou
             _icon = icon;
         }
 
-        public abstract bool Click();
+        public abstract bool Invoke();
         public event ActionChanged onActionChanged;
     }
 }

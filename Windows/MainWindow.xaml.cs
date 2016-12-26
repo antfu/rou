@@ -10,6 +10,8 @@ using Rou.Utils;
 using Rou.Actions;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
+using MaterialIcons;
+using System.Windows.Forms;
 
 namespace Rou
 {
@@ -18,6 +20,7 @@ namespace Rou
     /// </summary>
     public partial class MainWindow : Window
     {
+        public readonly Keys HotKey = Keys.F7;
         public readonly double RouRaduis = 100;
         public readonly double RouInnderRaduis = 30;
         public readonly double RouPadding = 40;
@@ -31,11 +34,8 @@ namespace Rou
         private KeyboardHookEx hookEx = new KeyboardHookEx();
         private System.Windows.Forms.NotifyIcon notifyIcon = null;
         private Action currentAction = null;
-        private DoubleAnimation scalerAnimator = new DoubleAnimation()
-        {
-            Duration = new Duration(TimeSpan.FromMilliseconds(500)),
-        };
-        private Storyboard StorayboardIn;
+        private Storyboard StoryboardIn;
+        private Storyboard StoryboardOut;
 
         public MainWindow()
         {
@@ -46,43 +46,53 @@ namespace Rou
 
         public void init()
         {
-            hookEx.HookedKeys.Add(System.Windows.Forms.Keys.F7);
+            hookEx.HookedKeys.Add(HotKey);
             hookEx.KeyDown += HookEx_KeyDown;
             hookEx.KeyUp += HookEx_KeyUp;
 
-            notifyIcon = new System.Windows.Forms.NotifyIcon();
+            notifyIcon = new NotifyIcon();
             notifyIcon.Icon = Properties.Resources.icon_32_ico;
             notifyIcon.BalloonTipTitle = "Rou";
             notifyIcon.BalloonTipText = "";
+            notifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu();
+            var exit = new System.Windows.Forms.MenuItem { Text = "Exit" };
+            notifyIcon.ContextMenu.MenuItems.Add(exit);
+            exit.Click += (s, e) =>
+            {
+                Exit();
+            };
 
             rouBack.Width = RouRaduis * 2;
             rouBack.Height = RouRaduis * 2;
             cavans.Width = RouRaduis * 2;
             cavans.Height = RouRaduis * 2;
-            this.Width = RouRaduis * 2 + RouPadding*2;
-            this.Height = RouRaduis * 2 + RouPadding*2;
+            Width = RouRaduis * 2 + RouPadding * 2;
+            Height = RouRaduis * 2 + RouPadding * 2;
 
             actions = new List<Action>();
-            actions.Add(new PauseTrackAction());
-            actions.Add(new NextTrackAction());
-            actions.Add(new WinAction());
-            actions.Add(new KeyPressAction("Task View", MaterialIcons.MaterialIconType.ic_view_quilt, new List<KeyAction>() {
-                new KeyAction(System.Windows.Forms.Keys.LWin, KeyOperation.Down),
-                new KeyAction(System.Windows.Forms.Keys.Tab, KeyOperation.Press),
-                new KeyAction(System.Windows.Forms.Keys.LWin, KeyOperation.Up)
+            actions.Add(new KeyboardAction("Pause", MaterialIconType.ic_pause, Keys.MediaPlayPause));
+            actions.Add(new KeyboardAction("Next Track", MaterialIconType.ic_skip_next, Keys.MediaNextTrack));
+            actions.Add(new KeyboardAction("Mute", MaterialIconType.ic_volume_off, Keys.VolumeMute));
+            actions.Add(new KeyboardAction("Task View", MaterialIconType.ic_view_quilt, new List<KeyAction>() {
+                new KeyAction(Keys.LWin, KeyOperation.Down),
+                new KeyAction(Keys.Tab, KeyOperation.Press),
+                new KeyAction(Keys.LWin, KeyOperation.Up)
             }, 100));
-            actions.Add(new PrevTrackAction());
+            actions.Add(new KeyboardAction("Prev Track", MaterialIconType.ic_skip_previous, Keys.MediaPreviousTrack));
 
-            StorayboardIn =  this.TryFindResource("ScaleOutStoryboard") as Storyboard;
+            StoryboardIn = this.TryFindResource("StoryboardIn") as Storyboard;
+            StoryboardOut = this.TryFindResource("StoryboardOut") as Storyboard;
             initSector();
-            StorayboardIn.Begin();
-            StorayboardIn.Pause();
+            StoryboardOut.Begin();
+            StoryboardOut.Pause();
+            StoryboardIn.Begin();
+            StoryboardIn.Pause();
         }
 
         private void HookEx_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            currentAction?.Click();
-            HideRou();
+            if (currentAction?.Invoke() != false)
+                HideRou();
             e.Handled = true;
         }
 
@@ -101,13 +111,16 @@ namespace Rou
         {
             if (!_shown)
             {
+                _shown = true;
                 this.Opacity = 0;
                 ShowByMouse();
                 currentAction = null;
-                _shown = true;
-             
-                StorayboardIn.Resume();
 
+                StoryboardIn.Seek(TimeSpan.FromMilliseconds(1), TimeSeekOrigin.BeginTime);
+                StoryboardIn.Resume();
+
+                StoryboardOut.Pause();
+                StoryboardOut.Seek(TimeSpan.FromMilliseconds(1), TimeSeekOrigin.BeginTime);
                 this.Opacity = 1;
             }
         }
@@ -116,12 +129,12 @@ namespace Rou
         {
             if (_shown)
             {
-                this.Opacity = 0;
-                StorayboardIn.Pause();
-                StorayboardIn.Seek(TimeSpan.FromMilliseconds(1), TimeSeekOrigin.BeginTime);
                 _shown = false;
+                StoryboardOut.Resume();
+                StoryboardIn.Pause();
             }
         }
+
 
         public void initSector()
         {
@@ -141,6 +154,7 @@ namespace Rou
                 cavans.Children.Add(icon);
 
                 path.Tag = action;
+                path.Cursor = System.Windows.Input.Cursors.Hand;
                 path.MouseEnter += Path_MouseEnter;
                 path.MouseLeave += Path_MouseLeave;
                 path.MouseDown += Path_MouseDown;
@@ -158,33 +172,8 @@ namespace Rou
             }
         }
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetCursorPos(ref Win32Point pt);
 
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Win32Point
-        {
-            public Int32 X;
-            public Int32 Y;
-        };
-
-        public static Point GetMousePosition()
-        {
-            Win32Point w32Mouse = new Win32Point();
-            GetCursorPos(ref w32Mouse);
-            return new Point(w32Mouse.X, w32Mouse.Y);
-        }
-
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-
-            //Set the window style to noactivate.
-            WindowInteropHelper helper = new WindowInteropHelper(this);
-            SetWindowLong(helper.Handle, GWL_EXSTYLE, GetWindowLong(helper.Handle, GWL_EXSTYLE) | WS_EX_NOACTIVATE);
-        }
-
+        #region Noactivate Window
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
 
@@ -194,20 +183,28 @@ namespace Rou
         [DllImport("user32.dll")]
         public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+
+            //Set the window style to noactivate.
+            WindowInteropHelper helper = new WindowInteropHelper(this);
+            SetWindowLong(helper.Handle, GWL_EXSTYLE, GetWindowLong(helper.Handle, GWL_EXSTYLE) | WS_EX_NOACTIVATE);
+        }
+        #endregion
+        
 
         public void ShowAtPosition(double x, double y)
         {
-            //RouContainer.Margin = new Thickness(x - RouRaduis, y - RouRaduis, 0, 0);
             Left = x - RouRaduis - RouPadding;
             Top = y - RouRaduis - RouPadding;
         }
 
         public void ShowByMouse()
         {
-            Point point = GetMousePosition();
+            Point point = MouseCursor.GetMousePosition();
             ShowAtPosition(point.X, point.Y);
         }
-
 
         private static Point PolarToRect(double r, double theta)
         {
@@ -244,18 +241,18 @@ namespace Rou
             path.Fill = fill;
             path.Stroke = stroke;
             path.Opacity = 0.4;
-            
+
             return path;
         }
 
         private void Path_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var path = (Path)sender;
-            (path.Tag as Action)?.Click();
+            (path.Tag as Action)?.Invoke();
             HideRou();
         }
 
-        private void Path_MouseLeave(object sender, MouseEventArgs e)
+        private void Path_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
             var path = (Path)sender;
             path.Opacity = 0.4;
@@ -264,28 +261,24 @@ namespace Rou
             currentAction = null;
         }
 
-        private void Path_MouseEnter(object sender, MouseEventArgs e)
+        private void Path_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             var path = (Path)sender;
-            path.Opacity = 0.5;
+            path.Opacity = 0.7;
             (path.Data as PathGeometry).Figures[0].Segments[0].IsStroked = true;
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = true;
             currentAction = path.Tag as Action;
         }
 
-        private void rouCenter_MouseDown(object sender, MouseButtonEventArgs e)
-        {
+        public void Exit() {
+            hookEx.unhook();
+            notifyIcon.Visible = false;
             Environment.Exit(0);
-        }
-
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            HideRou();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            notifyIcon.Visible = false;
+            e.Cancel = true;
         }
     }
 }

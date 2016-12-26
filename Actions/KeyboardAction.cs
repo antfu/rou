@@ -29,14 +29,14 @@ namespace Rou.Actions
         Up
     }
 
-    public class KeyPressAction : Action
+    public class KeyboardAction : Action
     {
         private System.Timers.Timer timer;
 
         public int Delay { get; private set; }
         public IEnumerable<KeyAction> Key { get; protected set; }
 
-        public KeyPressAction(string text, MaterialIconType type, IEnumerable<KeyAction> keys, int delay = 10) : base(text, type)
+        public KeyboardAction(string text, MaterialIconType type, IEnumerable<KeyAction> keys, int delay = 10) : base(text, type)
         {
             Delay = delay;
             Key = keys;
@@ -46,10 +46,10 @@ namespace Rou.Actions
             timer.Elapsed += new ElapsedEventHandler(TimerElapsed);
         }
 
-        public KeyPressAction(string text, MaterialIconType type, Keys key, int delay = 10) : this(text, type, new List<KeyAction>() { new KeyAction(key) }, delay)
+        public KeyboardAction(string text, MaterialIconType type, Keys key, int delay = 10) : this(text, type, new List<KeyAction>() { new KeyAction(key) }, delay)
         { }
 
-        public override bool Click()
+        public override bool Invoke()
         {
             timer.Start();
             return true;

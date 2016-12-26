@@ -1,4 +1,4 @@
-﻿<Window x:Class="Rou.MainWindow"
+﻿<Window x:Name="This" x:Class="Rou.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,14 +7,13 @@
         xmlns:mi="clr-namespace:MaterialIcons;assembly=MaterialIcons"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="350" Background="#01000000" WindowStartupLocation="CenterScreen"
-        Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" MouseDown="Window_MouseDown" ShowInTaskbar="False" Closing="Window_Closing">
+        Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" ShowInTaskbar="False" Closing="Window_Closing">
     <Window.Effect>
         <DropShadowEffect Opacity="0.8" Color="Gray" ShadowDepth="1"/>
     </Window.Effect>
-
-
+    
     <Window.Resources>
-        <Storyboard x:Key="ScaleOutStoryboard">
+        <Storyboard x:Key="StoryboardIn">
             <DoubleAnimation From="0.3" To="1" Duration="0:0:0:0.4" Storyboard.TargetName="WindowScaleTrans" Storyboard.TargetProperty="ScaleX">
                 <DoubleAnimation.EasingFunction>
                     <CircleEase EasingMode="EaseOut"/>
@@ -36,6 +35,13 @@
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
         </Storyboard>
+        <Storyboard x:Key="StoryboardOut">
+            <DoubleAnimation From="1" To="0" Duration="0:0:0:0.5" Storyboard.TargetName="This" Storyboard.TargetProperty="Opacity">
+                <DoubleAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
     </Window.Resources>
 
     <Grid x:Name="RouContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -45,20 +51,7 @@
                 <RotateTransform x:Name="WindowRotateTrans" Angle="-40"/>
             </TransformGroup>
         </Grid.LayoutTransform>
-        <Ellipse x:Name="rouBack" Fill="#00464646" HorizontalAlignment="Center" Height="300" Margin="0"  VerticalAlignment="Center" Width="300" MouseDown="rouCenter_MouseDown"/>
-        <Canvas x:Name="cavans" HorizontalAlignment="Center" Height="300" Margin="0" VerticalAlignment="Center" Width="300">
-            <Path Fill="Cyan" Stroke="Black" Canvas.Left="0" Canvas.Top="25">
-                <Path.Data>
-                    <PathGeometry>
-                        <PathFigure StartPoint="1,24" IsClosed="True">
-                            <LineSegment Point="35,58"/>
-                            <ArcSegment Size="55,20" Point="59,48" SweepDirection="Clockwise"/>
-                            <LineSegment Point="59,0"/>
-                            <ArcSegment Size="80,80" Point="1,24" SweepDirection="Counterclockwise"/>
-                        </PathFigure>
-                    </PathGeometry>
-                </Path.Data>
-            </Path>
-        </Canvas>
+        <Ellipse x:Name="rouBack" Fill="#00464646" HorizontalAlignment="Center" Height="300" Margin="0"  VerticalAlignment="Center" Width="300" Cursor="SizeAll"/>
+        <Canvas x:Name="cavans" HorizontalAlignment="Center" Height="300" Margin="0" VerticalAlignment="Center" Width="300"></Canvas>
     </Grid>
 </Window>
