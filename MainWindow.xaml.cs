@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Rou.Utils;
+using Rou.Actions;
+using System.Windows.Interop;
 
 namespace Rou
 {
@@ -26,6 +23,8 @@ namespace Rou
         public readonly Brush RouBackBrush = new SolidColorBrush(Color.FromArgb(128, 70, 70, 70));
         public readonly Brush RouStrokeBrush = new SolidColorBrush(Colors.Gray);
 
+        public List<Action> actions ;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -38,22 +37,40 @@ namespace Rou
             rouBack.Height = RouRaduis * 2;
             cavans.Width = RouRaduis * 2;
             cavans.Height = RouRaduis * 2;
-            this.Width = RouRaduis * 2 + RouPadding;
-            this.Height = RouRaduis * 2 + RouPadding;
+            RouContainer.Width = RouRaduis * 2 + RouPadding;
+            RouContainer.Height = RouRaduis * 2 + RouPadding;
 
-            initSector(8);
+            actions = new List<Action>();
+            actions.Add(new NextTrackAction());
+            actions.Add(new PrevTrackAction());
+            actions.Add(new PauseTrackAction());
+            actions.Add(new WinAction());
 
+            initSector();
         }
 
-        public void initSector(int count)
+        public void ShowRou() {
+            this.Show();
+        }
+
+        public void HideRou()
+        {
+            this.Hide();
+        }
+
+        public void initSector()
         {
             cavans.Children.Clear();
 
+            int count = actions.Count;
+
             double sectorTheta = Math.PI * 2 / count;
+            double offest = -Math.PI / 2 + sectorTheta / 2;
             for (int i = 0; i < count; i++)
             {
-                var path = CreateSector(RouRaduis, RouInnderRaduis, -Math.PI / 2 + sectorTheta * i, -Math.PI / 2 + sectorTheta * (i + 1), RouBackBrush, RouStrokeBrush);
+                var path = CreateSector(RouRaduis, RouInnderRaduis, offest + sectorTheta * i, offest + sectorTheta * (i + 1), RouBackBrush, RouStrokeBrush);
                 cavans.Children.Add(path);
+                path.Tag = actions[i];
                 Canvas.SetLeft(path, RouRaduis);
                 Canvas.SetTop(path, RouRaduis);
             }
@@ -75,11 +92,29 @@ namespace Rou
             GetCursorPos(ref w32Mouse);
             return new Point(w32Mouse.X, w32Mouse.Y);
         }
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+
+            //Set the window style to noactivate.
+            WindowInteropHelper helper = new WindowInteropHelper(this);
+            SetWindowLong(helper.Handle, GWL_EXSTYLE,
+                GetWindowLong(helper.Handle, GWL_EXSTYLE) | WS_EX_NOACTIVATE);
+        }
+
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_NOACTIVATE = 0x08000000;
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
 
         public void ShowAtPosition(double x, double y)
         {
-            this.Left = x - this.Width / 2;
-            this.Top = y - this.Height / 2;
+            RouContainer.Margin = new Thickness(x - RouContainer.Width / 2, y - RouContainer.Height / 2, 0, 0);
         }
 
         public void ShowByMouse()
@@ -98,7 +133,7 @@ namespace Rou
             return new Point(Math.Cos(theta) * r, Math.Sin(theta) * r);
         }
 
-        private static Path CreateSector(double outerRadius, double innerRadius, double fromDegree, double toDegree, Brush fill, Brush stroke)
+        private Path CreateSector(double outerRadius, double innerRadius, double fromDegree, double toDegree, Brush fill, Brush stroke)
         {
             if (fromDegree > toDegree)
             {
@@ -136,13 +171,14 @@ namespace Rou
             return path;
         }
 
-        private static void Path_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Path_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var path = (Path)sender;
-            MessageBox.Show("Hello");
+            (path.Tag as Action)?.Click();
+            HideRou();
         }
 
-        private static void Path_MouseLeave(object sender, MouseEventArgs e)
+        private void Path_MouseLeave(object sender, MouseEventArgs e)
         {
             var path = (Path)sender;
             path.Opacity = 0.5;
@@ -150,7 +186,7 @@ namespace Rou
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = false;
         }
 
-        private static void Path_MouseEnter(object sender, MouseEventArgs e)
+        private void Path_MouseEnter(object sender, MouseEventArgs e)
         {
             var path = (Path)sender;
             path.Opacity = 1;
@@ -161,6 +197,11 @@ namespace Rou
         private void rouCenter_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Environment.Exit(0);
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HideRou();
         }
     }
 }

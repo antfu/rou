@@ -4,12 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Rou"
+        xmlns:mi="clr-namespace:MaterialIcons;assembly=MaterialIcons"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="350" WindowStartupLocation="CenterScreen" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="{x:Null}" Loaded="Window_Loaded">
+        Title="MainWindow" Height="350" Width="350" Background="#01000000" WindowStartupLocation="CenterScreen" Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" WindowState="Maximized" MouseDown="Window_MouseDown">
     <Window.Effect>
         <DropShadowEffect Opacity="0.7"/>
     </Window.Effect>
-    <Grid>
+    <Grid x:Name="RouContainer" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <mi:MaterialIcon Icon="ic_close" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Opacity="0.6"/>
         <Ellipse x:Name="rouBack" Fill="#20000000" HorizontalAlignment="Center" Height="300" Margin="0"  VerticalAlignment="Center" Width="300" MouseDown="rouCenter_MouseDown"/>
         <Canvas x:Name="cavans" HorizontalAlignment="Center" Height="300" Margin="0" VerticalAlignment="Center" Width="300">
             <Path Fill="Cyan" Stroke="Black" Canvas.Left="0" Canvas.Top="25">
