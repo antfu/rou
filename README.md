@@ -4,7 +4,7 @@
 A customizable function wheel for mouse.
 
 ### Screenshot
-![screenshot](https://cloud.githubusercontent.com/assets/11247099/21485230/bb47d0ac-cbda-11e6-9d66-9fb342226577.png)
+![screenshot](https://cloud.githubusercontent.com/assets/11247099/21486582/c45047a8-cbf1-11e6-91db-24ef2b1c3092.gif)
 
 ***This project is still under developing...***
   
