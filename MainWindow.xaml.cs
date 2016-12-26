@@ -9,6 +9,7 @@ using System.Windows.Shapes;
 using Rou.Utils;
 using Rou.Actions;
 using System.Windows.Interop;
+using System.Windows.Media.Animation;
 
 namespace Rou
 {
@@ -21,18 +22,24 @@ namespace Rou
         public readonly double RouInnderRaduis = 30;
         public readonly double RouPadding = 40;
         public readonly double RouIconSize = 30;
-        public readonly Brush RouBackBrush = new SolidColorBrush(Color.FromArgb(128, 70, 70, 70));
-        public readonly Brush RouStrokeBrush = new SolidColorBrush(Colors.Gray);
+        public readonly Brush RouBackBrush = new SolidColorBrush(Color.FromArgb(60, 128, 128, 128));
+        public readonly Brush RouStrokeBrush = new SolidColorBrush(Color.FromArgb(128, 128, 128, 128));
 
         public List<Action> actions;
-        
+
+        private bool _shown = false;
         private KeyboardHookEx hookEx = new KeyboardHookEx();
         private System.Windows.Forms.NotifyIcon notifyIcon = null;
         private Action currentAction = null;
+        private DoubleAnimation scalerAnimator = new DoubleAnimation()
+        {
+            Duration = new Duration(TimeSpan.FromMilliseconds(500)),
+        };
+        private Storyboard StorayboardIn;
 
         public MainWindow()
         {
-            Visibility = Visibility.Hidden;
+            //Visibility = Visibility.Hidden;
             InitializeComponent();
             init();
         }
@@ -49,8 +56,8 @@ namespace Rou
             rouBack.Height = RouRaduis * 2;
             cavans.Width = RouRaduis * 2;
             cavans.Height = RouRaduis * 2;
-            this.Width = RouRaduis * 2 + RouPadding;
-            this.Height = RouRaduis * 2 + RouPadding;
+            this.Width = RouRaduis * 2 + RouPadding*2;
+            this.Height = RouRaduis * 2 + RouPadding*2;
 
             actions = new List<Action>();
             actions.Add(new PauseTrackAction());
@@ -63,7 +70,10 @@ namespace Rou
             }, 100));
             actions.Add(new PrevTrackAction());
 
+            StorayboardIn =  this.TryFindResource("ScaleOutStoryboard") as Storyboard;
             initSector();
+            StorayboardIn.Begin();
+            StorayboardIn.Pause();
         }
 
         private void HookEx_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -86,17 +96,28 @@ namespace Rou
 
         public void ShowRou()
         {
-            if (this.Visibility == Visibility.Hidden)
+            if (!_shown)
             {
+                this.Opacity = 0;
                 ShowByMouse();
                 currentAction = null;
-                this.Show();
+                _shown = true;
+             
+                StorayboardIn.Resume();
+
+                this.Opacity = 1;
             }
         }
 
         public void HideRou()
         {
-            this.Hide();
+            if (_shown)
+            {
+                this.Opacity = 0;
+                StorayboardIn.Pause();
+                StorayboardIn.Seek(TimeSpan.FromMilliseconds(1), TimeSeekOrigin.BeginTime);
+                _shown = false;
+            }
         }
 
         public void initSector()
@@ -174,8 +195,8 @@ namespace Rou
         public void ShowAtPosition(double x, double y)
         {
             //RouContainer.Margin = new Thickness(x - RouRaduis, y - RouRaduis, 0, 0);
-            Left = x - RouRaduis;
-            Top = y - RouRaduis;
+            Left = x - RouRaduis - RouPadding;
+            Top = y - RouRaduis - RouPadding;
         }
 
         public void ShowByMouse()
@@ -219,7 +240,7 @@ namespace Rou
             path.Data = geo;
             path.Fill = fill;
             path.Stroke = stroke;
-            path.Opacity = 0.5;
+            path.Opacity = 0.4;
             
             return path;
         }
@@ -234,7 +255,7 @@ namespace Rou
         private void Path_MouseLeave(object sender, MouseEventArgs e)
         {
             var path = (Path)sender;
-            path.Opacity = 0.5;
+            path.Opacity = 0.4;
             (path.Data as PathGeometry).Figures[0].Segments[0].IsStroked = false;
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = false;
             currentAction = null;
@@ -243,7 +264,7 @@ namespace Rou
         private void Path_MouseEnter(object sender, MouseEventArgs e)
         {
             var path = (Path)sender;
-            path.Opacity = 1;
+            path.Opacity = 0.5;
             (path.Data as PathGeometry).Figures[0].Segments[0].IsStroked = true;
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = true;
             currentAction = path.Tag as Action;

@@ -9,9 +9,42 @@
         Title="MainWindow" Height="350" Width="350" Background="#01000000" WindowStartupLocation="CenterScreen"
         Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" MouseDown="Window_MouseDown" ShowInTaskbar="False" Closing="Window_Closing">
     <Window.Effect>
-        <DropShadowEffect Opacity="0.7" ShadowDepth="2"/>
+        <DropShadowEffect Opacity="0.8" Color="Gray" ShadowDepth="1"/>
     </Window.Effect>
-    <Grid x:Name="RouContainer" HorizontalAlignment="Left" VerticalAlignment="Top">
+
+
+    <Window.Resources>
+        <Storyboard x:Key="ScaleOutStoryboard">
+            <DoubleAnimation From="0.3" To="1" Duration="0:0:0:0.4" Storyboard.TargetName="WindowScaleTrans" Storyboard.TargetProperty="ScaleX">
+                <DoubleAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation From="0.3" To="1" Duration="0:0:0:0.4" Storyboard.TargetName="WindowScaleTrans" Storyboard.TargetProperty="ScaleY">
+                <DoubleAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation From="-50" To="0" Duration="0:0:0:0.4" Storyboard.TargetName="WindowRotateTrans" Storyboard.TargetProperty="Angle">
+                <DoubleAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation From="0" To="1" Duration="0:0:0:0.4" Storyboard.TargetName="RouContainer" Storyboard.TargetProperty="Opacity">
+                <DoubleAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </Window.Resources>
+
+    <Grid x:Name="RouContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid.LayoutTransform>
+            <TransformGroup>
+                <ScaleTransform x:Name="WindowScaleTrans" ScaleX="0.3" ScaleY="0.3"/>
+                <RotateTransform x:Name="WindowRotateTrans" Angle="-40"/>
+            </TransformGroup>
+        </Grid.LayoutTransform>
         <Ellipse x:Name="rouBack" Fill="#00464646" HorizontalAlignment="Center" Height="300" Margin="0"  VerticalAlignment="Center" Width="300" MouseDown="rouCenter_MouseDown"/>
         <Canvas x:Name="cavans" HorizontalAlignment="Center" Height="300" Margin="0" VerticalAlignment="Center" Width="300">
             <Path Fill="Cyan" Stroke="Black" Canvas.Left="0" Canvas.Top="25">
