@@ -25,23 +25,23 @@ namespace Rou
         public readonly Brush RouStrokeBrush = new SolidColorBrush(Colors.Gray);
 
         public List<Action> actions;
-
-        KeyboardHook hook = new KeyboardHook();
+        
+        private KeyboardHookEx hookEx = new KeyboardHookEx();
         private System.Windows.Forms.NotifyIcon notifyIcon = null;
+        private Action currentAction = null;
 
         public MainWindow()
         {
+            Visibility = Visibility.Hidden;
             InitializeComponent();
             init();
         }
 
         public void init()
         {
-            // register the event that is fired after the key press.
-            hook.KeyPressed += Hook_KeyPressed;
-            hook.KeyRelease += Hook_KeyRelease;
-            // register the control + alt + F12 combination as hot key.
-            hook.RegisterHotKey(Utils.ModifierKeys.Control | Utils.ModifierKeys.Shift, System.Windows.Forms.Keys.Z);
+            hookEx.HookedKeys.Add(System.Windows.Forms.Keys.F7);
+            hookEx.KeyDown += HookEx_KeyDown;
+            hookEx.KeyUp += HookEx_KeyUp;
 
             notifyIcon = new System.Windows.Forms.NotifyIcon();
 
@@ -49,43 +49,49 @@ namespace Rou
             rouBack.Height = RouRaduis * 2;
             cavans.Width = RouRaduis * 2;
             cavans.Height = RouRaduis * 2;
-            RouContainer.Width = RouRaduis * 2 + RouPadding;
-            RouContainer.Height = RouRaduis * 2 + RouPadding;
+            this.Width = RouRaduis * 2 + RouPadding;
+            this.Height = RouRaduis * 2 + RouPadding;
 
             actions = new List<Action>();
-            actions.Add(new NextTrackAction());
             actions.Add(new PauseTrackAction());
-            actions.Add(new PrevTrackAction());
+            actions.Add(new NextTrackAction());
             actions.Add(new WinAction());
             actions.Add(new KeyPressAction("Task View", MaterialIcons.MaterialIconType.ic_view_quilt, new List<KeyAction>() {
                 new KeyAction(System.Windows.Forms.Keys.LWin, KeyOperation.Down),
-                new KeyAction(System.Windows.Forms.Keys.T, KeyOperation.Press),
+                new KeyAction(System.Windows.Forms.Keys.Tab, KeyOperation.Press),
                 new KeyAction(System.Windows.Forms.Keys.LWin, KeyOperation.Up)
             }, 100));
+            actions.Add(new PrevTrackAction());
 
             initSector();
         }
 
-        private void Hook_KeyRelease(object sender, KeyPressedEventArgs e)
+        private void HookEx_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
         {
+            currentAction?.Click();
             HideRou();
+            e.Handled = true;
         }
 
-        private void Hook_KeyPressed(object sender, KeyPressedEventArgs e)
+        private void HookEx_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             ShowRou();
+            e.Handled = true;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ShowRou();
             notifyIcon.Visible = true;
         }
 
         public void ShowRou()
         {
-            ShowByMouse();
-            this.Show();
+            if (this.Visibility == Visibility.Hidden)
+            {
+                ShowByMouse();
+                currentAction = null;
+                this.Show();
+            }
         }
 
         public void HideRou()
@@ -106,16 +112,23 @@ namespace Rou
             {
                 var action = actions[i];
                 var path = CreateSector(RouRaduis, RouInnderRaduis, offest + sectorTheta * i, offest + sectorTheta * (i + 1), RouBackBrush, RouStrokeBrush);
-                cavans.Children.Add(path);
-                path.Tag = action;
-                Canvas.SetLeft(path, RouRaduis);
-                Canvas.SetTop(path, RouRaduis);
                 var icon = action.Icon;
+                cavans.Children.Add(path);
                 cavans.Children.Add(icon);
+
+                path.Tag = action;
+                path.MouseEnter += Path_MouseEnter;
+                path.MouseLeave += Path_MouseLeave;
+                path.MouseDown += Path_MouseDown;
+
                 icon.Width = RouIconSize;
                 icon.Height = RouIconSize;
                 icon.Foreground = new SolidColorBrush(Colors.White);
+                icon.IsHitTestVisible = false;
+
                 var iconPos = PolarToRect(iconRaduis, (i + 0.5) * sectorTheta + offest);
+                Canvas.SetLeft(path, RouRaduis);
+                Canvas.SetTop(path, RouRaduis);
                 Canvas.SetLeft(icon, RouRaduis - RouIconSize / 2 + iconPos.X);
                 Canvas.SetTop(icon, RouRaduis - RouIconSize / 2 + iconPos.Y);
             }
@@ -131,20 +144,21 @@ namespace Rou
             public Int32 X;
             public Int32 Y;
         };
+
         public static Point GetMousePosition()
         {
             Win32Point w32Mouse = new Win32Point();
             GetCursorPos(ref w32Mouse);
             return new Point(w32Mouse.X, w32Mouse.Y);
         }
+
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
 
             //Set the window style to noactivate.
             WindowInteropHelper helper = new WindowInteropHelper(this);
-            SetWindowLong(helper.Handle, GWL_EXSTYLE,
-                GetWindowLong(helper.Handle, GWL_EXSTYLE) | WS_EX_NOACTIVATE);
+            SetWindowLong(helper.Handle, GWL_EXSTYLE, GetWindowLong(helper.Handle, GWL_EXSTYLE) | WS_EX_NOACTIVATE);
         }
 
         private const int GWL_EXSTYLE = -20;
@@ -159,7 +173,9 @@ namespace Rou
 
         public void ShowAtPosition(double x, double y)
         {
-            RouContainer.Margin = new Thickness(x - RouRaduis, y - RouRaduis, 0, 0);
+            //RouContainer.Margin = new Thickness(x - RouRaduis, y - RouRaduis, 0, 0);
+            Left = x - RouRaduis;
+            Top = y - RouRaduis;
         }
 
         public void ShowByMouse()
@@ -204,11 +220,7 @@ namespace Rou
             path.Fill = fill;
             path.Stroke = stroke;
             path.Opacity = 0.5;
-
-            path.MouseEnter += Path_MouseEnter;
-            path.MouseLeave += Path_MouseLeave;
-            path.MouseDown += Path_MouseDown;
-
+            
             return path;
         }
 
@@ -225,6 +237,7 @@ namespace Rou
             path.Opacity = 0.5;
             (path.Data as PathGeometry).Figures[0].Segments[0].IsStroked = false;
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = false;
+            currentAction = null;
         }
 
         private void Path_MouseEnter(object sender, MouseEventArgs e)
@@ -233,6 +246,7 @@ namespace Rou
             path.Opacity = 1;
             (path.Data as PathGeometry).Figures[0].Segments[0].IsStroked = true;
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = true;
+            currentAction = path.Tag as Action;
         }
 
         private void rouCenter_MouseDown(object sender, MouseButtonEventArgs e)

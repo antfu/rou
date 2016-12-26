@@ -60,6 +60,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Actions\KeyPressAction.cs" />
+    <Compile Include="Utils\KeyboardHookEx.cs" />
     <Compile Include="Utils\KeyboardSimulator.cs" />
     <Compile Include="Utils\KeyboardHook.cs" />
     <Compile Include="Utils\MouseSimulator.cs" />

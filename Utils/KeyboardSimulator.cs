@@ -20,18 +20,30 @@ namespace Rou.Utils
 		#region Methods
 		public static void KeyDown(Keys key)
 		{
-			keybd_event(ParseKey(key), 0x45, 0, 0);
+			keybd_event(ParseKey(key), GetScanCode(key), 0, 0);
 		}
 		public static void KeyUp(Keys key)
 		{
-			keybd_event(ParseKey(key), 0x45, KEYEVENTF_KEYUP, 0);
+			keybd_event(ParseKey(key), GetScanCode(key), KEYEVENTF_KEYUP, 0);
 		}
 		public static void KeyPress(Keys key)
 		{
 			KeyDown(key);
 			KeyUp(key);
 		}
-	
+
+        static byte GetScanCode(Keys key) {
+            // Alt, Shift, and Control need to be changed for API function to work with them
+            switch (key)
+            {
+                case Keys.MediaNextTrack:
+                case Keys.MediaPreviousTrack:
+                case Keys.MediaPlayPause:
+                    return 0x45;
+                default:
+                    return 0;
+            }
+        }
 		static byte ParseKey(Keys key)
 		{
 			// Alt, Shift, and Control need to be changed for API function to work with them
