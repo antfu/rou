@@ -51,6 +51,9 @@ namespace Rou
             hookEx.KeyUp += HookEx_KeyUp;
 
             notifyIcon = new System.Windows.Forms.NotifyIcon();
+            notifyIcon.Icon = Properties.Resources.icon_32_ico;
+            notifyIcon.BalloonTipTitle = "Rou";
+            notifyIcon.BalloonTipText = "";
 
             rouBack.Width = RouRaduis * 2;
             rouBack.Height = RouRaduis * 2;
