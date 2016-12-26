@@ -6,12 +6,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Rou.Utils;
-using Rou.Actions;
+using System.Windows.Forms;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using MaterialIcons;
-using System.Windows.Forms;
+using Rou.Utils;
+using Rou.Actions;
+using Rou.Windows;
 
 namespace Rou
 {
@@ -55,8 +56,14 @@ namespace Rou
             notifyIcon.BalloonTipTitle = "Rou";
             notifyIcon.BalloonTipText = "";
             notifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu();
+            var options = new System.Windows.Forms.MenuItem { Text = "Options" };
             var exit = new System.Windows.Forms.MenuItem { Text = "Exit" };
+            notifyIcon.ContextMenu.MenuItems.Add(options);
             notifyIcon.ContextMenu.MenuItems.Add(exit);
+            options.Click += (s, e) =>
+            {
+                (new IconSelectWindow()).Show();
+            };
             exit.Click += (s, e) =>
             {
                 Exit();
