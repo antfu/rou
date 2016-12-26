@@ -9,18 +9,35 @@ using System.Windows.Forms;
 
 namespace Rou.Actions
 {
-    public abstract class KeyPressAction : Action
+    public struct KeyAction
+    {
+        public Keys Key { get; private set; }
+        public KeyOperation Operation { get; private set; }
+        public int Delay { get; private set; }
+
+        public KeyAction(Keys key, KeyOperation operation = KeyOperation.Press, int delay = 10) {
+            Key = key;
+            Operation = operation;
+            Delay = delay;
+        }
+    }
+    public enum KeyOperation
+    {
+        Press,
+        Down,
+        Up
+    }
+
+    public class KeyPressAction : Action
     {
         private System.Timers.Timer timer;
 
         public int Delay { get; private set; }
-        public int Interval { get; private set; }
-        public IEnumerable<Keys> Key { get; protected set; }
+        public IEnumerable<KeyAction> Key { get; protected set; }
 
-        public KeyPressAction(string text, MaterialIconType type, IEnumerable<Keys> keys, int interval = 10, int delay = 10) : base(text, type)
+        public KeyPressAction(string text, MaterialIconType type, IEnumerable<KeyAction> keys,int delay = 10) : base(text, type)
         {
             Delay = delay;
-            Interval = Interval;
             Key = keys;
             timer = new System.Timers.Timer();
             timer.Interval = Delay; //In milliseconds here
@@ -28,7 +45,7 @@ namespace Rou.Actions
             timer.Elapsed += new ElapsedEventHandler(TimerElapsed);
         }
 
-        public KeyPressAction(string text, MaterialIconType type, Keys key, int delay = 10) : this(text, type, new List<Keys>() { key }, 10, delay)
+        public KeyPressAction(string text, MaterialIconType type, Keys key, int delay = 10) : this(text, type, new List<KeyAction>() { new KeyAction(key) }, delay)
         {}
 
         public override bool Click()
@@ -42,11 +59,20 @@ namespace Rou.Actions
             timer.Stop();
             foreach (var key in Key)
             {
-                KeyboardSimulator.KeyPress(key);
-                System.Threading.Thread.Sleep(Interval);
+                switch (key.Operation)
+                {
+                    case KeyOperation.Press:
+                        KeyboardSimulator.KeyPress(key.Key);
+                        break;
+                    case KeyOperation.Down:
+                        KeyboardSimulator.KeyDown(key.Key);
+                        break;
+                    case KeyOperation.Up:
+                        KeyboardSimulator.KeyUp(key.Key);
+                        break;
+                }
+                System.Threading.Thread.Sleep(key.Delay);
             }
-            //MessageBox.Show("Pressed " + this.Text);
-
         }
     }
 }

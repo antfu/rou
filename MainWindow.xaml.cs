@@ -26,6 +26,8 @@ namespace Rou
 
         public List<Action> actions;
 
+        private System.Windows.Forms.NotifyIcon notifyIcon = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -34,6 +36,8 @@ namespace Rou
 
         public void init()
         {
+            notifyIcon = new System.Windows.Forms.NotifyIcon();
+
             rouBack.Width = RouRaduis * 2;
             rouBack.Height = RouRaduis * 2;
             cavans.Width = RouRaduis * 2;
@@ -48,6 +52,12 @@ namespace Rou
             actions.Add(new WinAction());
 
             initSector();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            ShowRou();
+            notifyIcon.Visible = true;
         }
 
         public void ShowRou()
@@ -191,10 +201,6 @@ namespace Rou
             ShowAtPosition(point.X, point.Y);
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            ShowRou();
-        }
 
         private static Point PolarToRect(double r, double theta)
         {
@@ -270,6 +276,11 @@ namespace Rou
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             HideRou();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            notifyIcon.Visible = false;
         }
     }
 }

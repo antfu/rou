@@ -7,7 +7,7 @@
         xmlns:mi="clr-namespace:MaterialIcons;assembly=MaterialIcons"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="350" Background="#01000000" WindowStartupLocation="CenterScreen"
-        Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" WindowState="Maximized" MouseDown="Window_MouseDown">
+        Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" WindowState="Maximized" MouseDown="Window_MouseDown" ShowInTaskbar="False" Closing="Window_Closing">
     <Window.Effect>
         <DropShadowEffect Opacity="0.7" ShadowDepth="2"/>
     </Window.Effect>
