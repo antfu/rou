@@ -15,7 +15,8 @@ namespace Rou.Actions
         public KeyOperation Operation { get; private set; }
         public int Delay { get; private set; }
 
-        public KeyAction(Keys key, KeyOperation operation = KeyOperation.Press, int delay = 10) {
+        public KeyAction(Keys key, KeyOperation operation = KeyOperation.Press, int delay = 10)
+        {
             Key = key;
             Operation = operation;
             Delay = delay;
@@ -35,18 +36,18 @@ namespace Rou.Actions
         public int Delay { get; private set; }
         public IEnumerable<KeyAction> Key { get; protected set; }
 
-        public KeyPressAction(string text, MaterialIconType type, IEnumerable<KeyAction> keys,int delay = 10) : base(text, type)
+        public KeyPressAction(string text, MaterialIconType type, IEnumerable<KeyAction> keys, int delay = 10) : base(text, type)
         {
             Delay = delay;
             Key = keys;
             timer = new System.Timers.Timer();
             timer.Interval = Delay; //In milliseconds here
-            timer.AutoReset = false; //Stops it from repeating
+            timer.AutoReset = false;
             timer.Elapsed += new ElapsedEventHandler(TimerElapsed);
         }
 
         public KeyPressAction(string text, MaterialIconType type, Keys key, int delay = 10) : this(text, type, new List<KeyAction>() { new KeyAction(key) }, delay)
-        {}
+        { }
 
         public override bool Click()
         {

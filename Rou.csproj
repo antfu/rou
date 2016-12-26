@@ -61,6 +61,7 @@
     </ApplicationDefinition>
     <Compile Include="Actions\KeyPressAction.cs" />
     <Compile Include="Utils\KeyboardSimulator.cs" />
+    <Compile Include="Utils\KeyboardHook.cs" />
     <Compile Include="Utils\MouseSimulator.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

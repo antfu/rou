@@ -26,6 +26,7 @@ namespace Rou
 
         public List<Action> actions;
 
+        KeyboardHook hook = new KeyboardHook();
         private System.Windows.Forms.NotifyIcon notifyIcon = null;
 
         public MainWindow()
@@ -36,6 +37,12 @@ namespace Rou
 
         public void init()
         {
+            // register the event that is fired after the key press.
+            hook.KeyPressed += Hook_KeyPressed;
+            hook.KeyRelease += Hook_KeyRelease;
+            // register the control + alt + F12 combination as hot key.
+            hook.RegisterHotKey(Utils.ModifierKeys.Control | Utils.ModifierKeys.Shift, System.Windows.Forms.Keys.Z);
+
             notifyIcon = new System.Windows.Forms.NotifyIcon();
 
             rouBack.Width = RouRaduis * 2;
@@ -50,8 +57,23 @@ namespace Rou
             actions.Add(new PauseTrackAction());
             actions.Add(new PrevTrackAction());
             actions.Add(new WinAction());
+            actions.Add(new KeyPressAction("Task View", MaterialIcons.MaterialIconType.ic_view_quilt, new List<KeyAction>() {
+                new KeyAction(System.Windows.Forms.Keys.LWin, KeyOperation.Down),
+                new KeyAction(System.Windows.Forms.Keys.T, KeyOperation.Press),
+                new KeyAction(System.Windows.Forms.Keys.LWin, KeyOperation.Up)
+            }, 100));
 
             initSector();
+        }
+
+        private void Hook_KeyRelease(object sender, KeyPressedEventArgs e)
+        {
+            HideRou();
+        }
+
+        private void Hook_KeyPressed(object sender, KeyPressedEventArgs e)
+        {
+            ShowRou();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -78,7 +100,7 @@ namespace Rou
             int count = actions.Count;
 
             double sectorTheta = Math.PI * 2 / count;
-            double offest = -Math.PI / 2 + sectorTheta / 2;
+            double offest = -Math.PI / 2 - sectorTheta / 2;
             double iconRaduis = (RouRaduis + RouInnderRaduis) / 2;
             for (int i = 0; i < count; i++)
             {
@@ -133,61 +155,6 @@ namespace Rou
 
         [DllImport("user32.dll")]
         public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-
-
-        [DllImport("user32.dll")]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
-
-        [DllImport("user32.dll")]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-
-        private const int HOTKEY_ID = 9000;
-
-        //Modifiers:
-        private const uint MOD_NONE = 0x0000; //[NONE]
-        private const uint MOD_ALT = 0x0001; //ALT
-        private const uint MOD_CONTROL = 0x0002; //CTRL
-        private const uint MOD_SHIFT = 0x0004; //SHIFT
-        private const uint MOD_WIN = 0x0008; //WINDOWS
-                                             //CAPS LOCK:
-        private const uint VK_CAPITAL = 0x14;
-
-        private HwndSource source;
-
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-
-            IntPtr handle = new WindowInteropHelper(this).Handle;
-            source = HwndSource.FromHwnd(handle);
-            source.AddHook(HwndHook);
-
-            RegisterHotKey(handle, HOTKEY_ID, MOD_CONTROL + MOD_SHIFT, (UInt32)System.Windows.Forms.Keys.Z);
-        }
-
-        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-        {
-            const int WM_HOTKEY = 0x0312;
-            switch (msg)
-            {
-                case WM_HOTKEY:
-                    switch (wParam.ToInt32())
-                    {
-                        case HOTKEY_ID:
-                            int vkey = (((int)lParam >> 16) & 0xFFFF);
-
-                            ShowRou();
-
-                            handled = true;
-                            break;
-                    }
-                    break;
-            }
-            return IntPtr.Zero;
-        }
-
 
 
         public void ShowAtPosition(double x, double y)
