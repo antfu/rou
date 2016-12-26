@@ -20,10 +20,11 @@ namespace Rou
         public readonly double RouRaduis = 100;
         public readonly double RouInnderRaduis = 30;
         public readonly double RouPadding = 40;
+        public readonly double RouIconSize = 30;
         public readonly Brush RouBackBrush = new SolidColorBrush(Color.FromArgb(128, 70, 70, 70));
         public readonly Brush RouStrokeBrush = new SolidColorBrush(Colors.Gray);
 
-        public List<Action> actions ;
+        public List<Action> actions;
 
         public MainWindow()
         {
@@ -42,14 +43,16 @@ namespace Rou
 
             actions = new List<Action>();
             actions.Add(new NextTrackAction());
-            actions.Add(new PrevTrackAction());
             actions.Add(new PauseTrackAction());
+            actions.Add(new PrevTrackAction());
             actions.Add(new WinAction());
 
             initSector();
         }
 
-        public void ShowRou() {
+        public void ShowRou()
+        {
+            ShowByMouse();
             this.Show();
         }
 
@@ -66,13 +69,23 @@ namespace Rou
 
             double sectorTheta = Math.PI * 2 / count;
             double offest = -Math.PI / 2 + sectorTheta / 2;
+            double iconRaduis = (RouRaduis + RouInnderRaduis) / 2;
             for (int i = 0; i < count; i++)
             {
+                var action = actions[i];
                 var path = CreateSector(RouRaduis, RouInnderRaduis, offest + sectorTheta * i, offest + sectorTheta * (i + 1), RouBackBrush, RouStrokeBrush);
                 cavans.Children.Add(path);
-                path.Tag = actions[i];
+                path.Tag = action;
                 Canvas.SetLeft(path, RouRaduis);
                 Canvas.SetTop(path, RouRaduis);
+                var icon = action.Icon;
+                cavans.Children.Add(icon);
+                icon.Width = RouIconSize;
+                icon.Height = RouIconSize;
+                icon.Foreground = new SolidColorBrush(Colors.White);
+                var iconPos = PolarToRect(iconRaduis, (i + 0.5) * sectorTheta + offest);
+                Canvas.SetLeft(icon, RouRaduis - RouIconSize / 2 + iconPos.X);
+                Canvas.SetTop(icon, RouRaduis - RouIconSize / 2 + iconPos.Y);
             }
         }
 
@@ -112,9 +125,64 @@ namespace Rou
         public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
 
+
+        [DllImport("user32.dll")]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+        [DllImport("user32.dll")]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+
+        private const int HOTKEY_ID = 9000;
+
+        //Modifiers:
+        private const uint MOD_NONE = 0x0000; //[NONE]
+        private const uint MOD_ALT = 0x0001; //ALT
+        private const uint MOD_CONTROL = 0x0002; //CTRL
+        private const uint MOD_SHIFT = 0x0004; //SHIFT
+        private const uint MOD_WIN = 0x0008; //WINDOWS
+                                             //CAPS LOCK:
+        private const uint VK_CAPITAL = 0x14;
+
+        private HwndSource source;
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+
+            IntPtr handle = new WindowInteropHelper(this).Handle;
+            source = HwndSource.FromHwnd(handle);
+            source.AddHook(HwndHook);
+
+            RegisterHotKey(handle, HOTKEY_ID, MOD_CONTROL + MOD_SHIFT, (UInt32)System.Windows.Forms.Keys.Z);
+        }
+
+        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_HOTKEY = 0x0312;
+            switch (msg)
+            {
+                case WM_HOTKEY:
+                    switch (wParam.ToInt32())
+                    {
+                        case HOTKEY_ID:
+                            int vkey = (((int)lParam >> 16) & 0xFFFF);
+
+                            ShowRou();
+
+                            handled = true;
+                            break;
+                    }
+                    break;
+            }
+            return IntPtr.Zero;
+        }
+
+
+
         public void ShowAtPosition(double x, double y)
         {
-            RouContainer.Margin = new Thickness(x - RouContainer.Width / 2, y - RouContainer.Height / 2, 0, 0);
+            RouContainer.Margin = new Thickness(x - RouRaduis, y - RouRaduis, 0, 0);
         }
 
         public void ShowByMouse()
@@ -125,7 +193,7 @@ namespace Rou
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ShowByMouse();
+            ShowRou();
         }
 
         private static Point PolarToRect(double r, double theta)
@@ -149,7 +217,7 @@ namespace Rou
 
             var path = new Path();
             var largeArc = (toDegree - fromDegree) >= Math.PI;
-        
+
             var geo = new PathGeometry(new List<PathFigure>() {
                 new PathFigure(p1, new List<PathSegment>() {
                     new LineSegment(p2, false),

@@ -6,13 +6,14 @@
         xmlns:local="clr-namespace:Rou"
         xmlns:mi="clr-namespace:MaterialIcons;assembly=MaterialIcons"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="350" Background="#01000000" WindowStartupLocation="CenterScreen" Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" WindowState="Maximized" MouseDown="Window_MouseDown">
+        Title="MainWindow" Height="350" Width="350" Background="#01000000" WindowStartupLocation="CenterScreen"
+        Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" WindowState="Maximized" MouseDown="Window_MouseDown">
     <Window.Effect>
-        <DropShadowEffect Opacity="0.7"/>
+        <DropShadowEffect Opacity="0.7" ShadowDepth="2"/>
     </Window.Effect>
     <Grid x:Name="RouContainer" HorizontalAlignment="Left" VerticalAlignment="Top">
-        <mi:MaterialIcon Icon="ic_close" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Opacity="0.6"/>
-        <Ellipse x:Name="rouBack" Fill="#20000000" HorizontalAlignment="Center" Height="300" Margin="0"  VerticalAlignment="Center" Width="300" MouseDown="rouCenter_MouseDown"/>
+        <Ellipse x:Name="rouBack" Fill="#4C464646" HorizontalAlignment="Center" Height="300" Margin="0"  VerticalAlignment="Center" Width="300" MouseDown="rouCenter_MouseDown"/>
+        <mi:MaterialIcon Icon="ic_close" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Opacity="0.8"  MouseDown="rouCenter_MouseDown"/>
         <Canvas x:Name="cavans" HorizontalAlignment="Center" Height="300" Margin="0" VerticalAlignment="Center" Width="300">
             <Path Fill="Cyan" Stroke="Black" Canvas.Left="0" Canvas.Top="25">
                 <Path.Data>

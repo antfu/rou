@@ -28,7 +28,7 @@ namespace Rou.Actions
 
     public class WinAction : KeyPressAction
     {
-        public WinAction() : base("Win", MaterialIconType.ic_pause, Keys.LWin)
+        public WinAction() : base("Win", MaterialIconType.ic_menu, Keys.LWin)
         { }
     }
 }
