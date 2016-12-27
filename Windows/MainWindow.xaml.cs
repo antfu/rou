@@ -18,14 +18,6 @@ namespace Rou
 {
     public partial class MainWindow : Window
     {
-        public readonly Keys HotKey = Keys.F7;
-        public readonly double RouRaduis = 110;
-        public readonly double RouInnderRaduis = 40;
-        public readonly double RouPadding = 40;
-        public readonly double RouIconSize = 30;
-        public readonly Brush RouBackBrush = new SolidColorBrush(Color.FromArgb(100, 128, 128, 128));
-        public readonly Brush RouStrokeBrush = new SolidColorBrush(Color.FromArgb(200, 128, 128, 128));
-
         public List<Action> actions;
 
         private bool _shown = false;
@@ -44,7 +36,7 @@ namespace Rou
 
         public void init()
         {
-            hookEx.HookedKeys.Add(HotKey);
+            hookEx.HookedKeys.Add(C.HotKey);
             hookEx.KeyDown += HookEx_KeyDown;
             hookEx.KeyUp += HookEx_KeyUp;
 
@@ -66,13 +58,14 @@ namespace Rou
                 Exit();
             };
 
-            rouBack.Width = RouRaduis * 2;
-            rouBack.Height = RouRaduis * 2;
-            cavans.Width = RouRaduis * 2;
-            cavans.Height = RouRaduis * 2;
-            Width = RouRaduis * 2 + RouPadding * 2;
-            Height = RouRaduis * 2 + RouPadding * 2;
+            rouBack.Width = C.RouRaduis * 2;
+            rouBack.Height = C.RouRaduis * 2;
+            cavans.Width = C.RouRaduis * 2;
+            cavans.Height = C.RouRaduis * 2;
+            Width = C.RouRaduis * 2 + C.RouPadding * 2;
+            Height = C.RouRaduis * 2 + C.RouPadding * 2;
 
+            /*
             actions = new List<Action>();
             actions.Add(new KeyboardAction("Pause", MaterialIconType.ic_pause, Keys.MediaPlayPause));
             actions.Add(new KeyboardAction("Next Track", MaterialIconType.ic_skip_next, Keys.MediaNextTrack));
@@ -83,6 +76,8 @@ namespace Rou
                 new KeyAction(Keys.LWin, KeyOperation.Up)
             }, 100));
             actions.Add(new KeyboardAction("Prev Track", MaterialIconType.ic_skip_previous, Keys.MediaPreviousTrack));
+            */
+            actions = JsonLoader.LoadAction(@"Preset\default.json");
 
             StoryboardIn = this.TryFindResource("StoryboardIn") as Storyboard;
             StoryboardOut = this.TryFindResource("StoryboardOut") as Storyboard;
@@ -150,11 +145,11 @@ namespace Rou
 
             double sectorTheta = Math.PI * 2 / count;
             double offest = -Math.PI / 2 - sectorTheta / 2;
-            double iconRaduis = (RouRaduis + RouInnderRaduis) / 2;
+            double iconRaduis = (C.RouRaduis + C.RouInnderRaduis) / 2;
             for (int i = 0; i < count; i++)
             {
                 var action = actions[i];
-                var path = CreateSector(RouRaduis, RouInnderRaduis, offest + sectorTheta * i, offest + sectorTheta * (i + 1), RouBackBrush, RouStrokeBrush);
+                var path = CreateSector(C.RouRaduis, C.RouInnderRaduis, offest + sectorTheta * i, offest + sectorTheta * (i + 1), C.RouBackBrush, C.RouStrokeBrush);
                 var icon = action.Icon;
                 cavans.Children.Add(path);
                 cavans.Children.Add(icon);
@@ -163,18 +158,17 @@ namespace Rou
                 path.Cursor = System.Windows.Input.Cursors.Hand;
                 path.MouseEnter += Path_MouseEnter;
                 path.MouseLeave += Path_MouseLeave;
-                //path.MouseDown += Path_MouseDown;
 
-                icon.Width = RouIconSize;
-                icon.Height = RouIconSize;
+                icon.Width = C.RouIconSize;
+                icon.Height = C.RouIconSize;
                 icon.Foreground = new SolidColorBrush(Colors.White);
                 icon.IsHitTestVisible = false;
 
                 var iconPos = PolarToRect(iconRaduis, (i + 0.5) * sectorTheta + offest);
-                Canvas.SetLeft(path, RouRaduis);
-                Canvas.SetTop(path, RouRaduis);
-                Canvas.SetLeft(icon, RouRaduis - RouIconSize / 2 + iconPos.X);
-                Canvas.SetTop(icon, RouRaduis - RouIconSize / 2 + iconPos.Y);
+                Canvas.SetLeft(path, C.RouRaduis);
+                Canvas.SetTop(path, C.RouRaduis);
+                Canvas.SetLeft(icon, C.RouRaduis - C.RouIconSize / 2 + iconPos.X);
+                Canvas.SetTop(icon, C.RouRaduis - C.RouIconSize / 2 + iconPos.Y);
             }
         }
 
@@ -202,8 +196,8 @@ namespace Rou
 
         public void ShowAtPosition(double x, double y)
         {
-            Left = x - RouRaduis - RouPadding;
-            Top = y - RouRaduis - RouPadding;
+            Left = x - C.RouRaduis - C.RouPadding;
+            Top = y - C.RouRaduis - C.RouPadding;
         }
 
         public void ShowByMouse()

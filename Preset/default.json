@@ -1,0 +1,38 @@
+﻿{
+  "actions": [
+    {
+      "type": "keyboard",
+      "text": "Pause",
+      "icon": "ic_pause",
+      "keys": "MediaPlayPause"
+    },
+    {
+      "type": "keyboard",
+      "text": "Next Track",
+      "icon": "ic_skip_next",
+      "keys": "MediaNextTrack"
+    },
+    {
+      "type": "keyboard",
+      "text": "Mute",
+      "icon": "ic_volume_off",
+      "keys": "VolumeMute"
+    },
+    {
+      "type": "keyboard",
+      "text": "Task View",
+      "icon": "ic_view_quilt",
+      "keys": [
+        "D LWin",
+        "P Tab",
+        "U LWin"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "Prev Track",
+      "icon": "ic_skip_previous",
+      "keys": "MediaPreviousTrack"
+    }
+  ]
+}

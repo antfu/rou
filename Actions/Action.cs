@@ -16,7 +16,7 @@ namespace Rou
             Button,
             Slide
         }
-
+        
         private string _text;
         private MaterialIconType _icon;
 
