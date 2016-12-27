@@ -14,12 +14,12 @@
     
     <Window.Resources>
         <Storyboard x:Key="StoryboardIn">
-            <DoubleAnimation From="0.3" To="1" Duration="0:0:0:0.4" Storyboard.TargetName="WindowScaleTrans" Storyboard.TargetProperty="ScaleX">
+            <DoubleAnimation From="0.1" To="1" Duration="0:0:0:0.4" Storyboard.TargetName="WindowScaleTrans" Storyboard.TargetProperty="ScaleX">
                 <DoubleAnimation.EasingFunction>
                     <CircleEase EasingMode="EaseOut"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
-            <DoubleAnimation From="0.3" To="1" Duration="0:0:0:0.4" Storyboard.TargetName="WindowScaleTrans" Storyboard.TargetProperty="ScaleY">
+            <DoubleAnimation From="0.1" To="1" Duration="0:0:0:0.4" Storyboard.TargetName="WindowScaleTrans" Storyboard.TargetProperty="ScaleY">
                 <DoubleAnimation.EasingFunction>
                     <CircleEase EasingMode="EaseOut"/>
                 </DoubleAnimation.EasingFunction>

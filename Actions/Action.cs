@@ -62,7 +62,7 @@ namespace Rou
             _icon = icon;
         }
 
-        public abstract bool Invoke();
+        public abstract bool HoverRelease();
         public event ActionChanged onActionChanged;
     }
 }

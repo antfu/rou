@@ -16,31 +16,28 @@ using Rou.Windows;
 
 namespace Rou
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public readonly Keys HotKey = Keys.F7;
-        public readonly double RouRaduis = 100;
-        public readonly double RouInnderRaduis = 30;
+        public readonly double RouRaduis = 110;
+        public readonly double RouInnderRaduis = 40;
         public readonly double RouPadding = 40;
         public readonly double RouIconSize = 30;
-        public readonly Brush RouBackBrush = new SolidColorBrush(Color.FromArgb(60, 128, 128, 128));
-        public readonly Brush RouStrokeBrush = new SolidColorBrush(Color.FromArgb(128, 128, 128, 128));
+        public readonly Brush RouBackBrush = new SolidColorBrush(Color.FromArgb(100, 128, 128, 128));
+        public readonly Brush RouStrokeBrush = new SolidColorBrush(Color.FromArgb(200, 128, 128, 128));
 
         public List<Action> actions;
 
         private bool _shown = false;
         private KeyboardHookEx hookEx = new KeyboardHookEx();
-        private System.Windows.Forms.NotifyIcon notifyIcon = null;
+        private NotifyIcon notifyIcon = null;
         private Action currentAction = null;
         private Storyboard StoryboardIn;
         private Storyboard StoryboardOut;
 
         public MainWindow()
         {
-            //Visibility = Visibility.Hidden;
+            IsHitTestVisible = false;
             InitializeComponent();
             init();
         }
@@ -98,7 +95,7 @@ namespace Rou
 
         private void HookEx_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            if (currentAction?.Invoke() != false)
+            if (currentAction?.HoverRelease() != false)
                 HideRou();
             e.Handled = true;
         }
@@ -119,7 +116,7 @@ namespace Rou
             if (!_shown)
             {
                 _shown = true;
-                this.Opacity = 0;
+                Opacity = 0;
                 ShowByMouse();
                 currentAction = null;
 
@@ -128,7 +125,8 @@ namespace Rou
 
                 StoryboardOut.Pause();
                 StoryboardOut.Seek(TimeSpan.FromMilliseconds(1), TimeSeekOrigin.BeginTime);
-                this.Opacity = 1;
+                Opacity = 1;
+                IsHitTestVisible = true;
             }
         }
 
@@ -136,6 +134,7 @@ namespace Rou
         {
             if (_shown)
             {
+                IsHitTestVisible = false;
                 _shown = false;
                 StoryboardOut.Resume();
                 StoryboardIn.Pause();
@@ -164,7 +163,7 @@ namespace Rou
                 path.Cursor = System.Windows.Input.Cursors.Hand;
                 path.MouseEnter += Path_MouseEnter;
                 path.MouseLeave += Path_MouseLeave;
-                path.MouseDown += Path_MouseDown;
+                //path.MouseDown += Path_MouseDown;
 
                 icon.Width = RouIconSize;
                 icon.Height = RouIconSize;
@@ -255,7 +254,7 @@ namespace Rou
         private void Path_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var path = (Path)sender;
-            (path.Tag as Action)?.Invoke();
+            (path.Tag as Action)?.HoverRelease();
             HideRou();
         }
 

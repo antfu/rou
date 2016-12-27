@@ -49,7 +49,7 @@ namespace Rou.Actions
         public KeyboardAction(string text, MaterialIconType type, Keys key, int delay = 10) : this(text, type, new List<KeyAction>() { new KeyAction(key) }, delay)
         { }
 
-        public override bool Invoke()
+        public override bool HoverRelease()
         {
             timer.Start();
             return true;
