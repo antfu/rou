@@ -14,17 +14,41 @@
     },
     {
       "type": "keyboard",
-      "text": "Mute",
-      "icon": "ic_volume_off",
-      "keys": "VolumeMute"
+      "text": "Next Desktop",
+      "icon": "ic_arrow_forward",
+      "keys": [
+        "D LWin",
+        "D Control",
+        "P Right",
+        "U Control",
+        "U LWin"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "More",
+      "icon": "ic_more_vert",
+      "keys": "Apps"
     },
     {
       "type": "keyboard",
       "text": "Task View",
-      "icon": "ic_view_quilt",
+      "icon": "ic_view_carousel",
       "keys": [
         "D LWin",
         "P Tab",
+        "U LWin"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "Prev Desktop",
+      "icon": "ic_arrow_back",
+      "keys": [
+        "D LWin",
+        "D Control",
+        "P Left",
+        "U Control",
         "U LWin"
       ]
     },

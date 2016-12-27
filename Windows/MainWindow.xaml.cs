@@ -27,6 +27,8 @@ namespace Rou
         private Storyboard StoryboardIn;
         private Storyboard StoryboardOut;
 
+        public bool ShowText { get; private set; } = true;
+
         public MainWindow()
         {
             IsHitTestVisible = false;
@@ -36,7 +38,8 @@ namespace Rou
 
         public void init()
         {
-            hookEx.HookedKeys.Add(C.HotKey);
+            foreach (var key in C.HotKey)
+                hookEx.HookedKeys.Add(key);
             hookEx.KeyDown += HookEx_KeyDown;
             hookEx.KeyUp += HookEx_KeyUp;
 
@@ -161,14 +164,30 @@ namespace Rou
 
                 icon.Width = C.RouIconSize;
                 icon.Height = C.RouIconSize;
-                icon.Foreground = new SolidColorBrush(Colors.White);
+                icon.Foreground = C.RouActionIconBrush;
                 icon.IsHitTestVisible = false;
 
                 var iconPos = PolarToRect(iconRaduis, (i + 0.5) * sectorTheta + offest);
                 Canvas.SetLeft(path, C.RouRaduis);
                 Canvas.SetTop(path, C.RouRaduis);
                 Canvas.SetLeft(icon, C.RouRaduis - C.RouIconSize / 2 + iconPos.X);
-                Canvas.SetTop(icon, C.RouRaduis - C.RouIconSize / 2 + iconPos.Y);
+                Canvas.SetTop(icon, C.RouRaduis - C.RouIconSize / 2 + iconPos.Y - (ShowText ? 10 : 0));
+
+                if (ShowText)
+                {
+                    var label = new TextBlock();
+                    label.Text = action.Text;
+                    label.Foreground = C.RouActionIconTextBrush;
+                    label.VerticalAlignment = VerticalAlignment.Top;
+                    label.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+                    label.FontSize = 9;
+                    label.TextTrimming = TextTrimming.CharacterEllipsis;
+                    label.TextAlignment = TextAlignment.Center;
+                    label.Width = C.RouIconSize / 2 * 3;
+                    cavans.Children.Add(label);
+                    Canvas.SetLeft(label, C.RouRaduis + iconPos.X - label.Width / 2);
+                    Canvas.SetTop(label, C.RouRaduis + iconPos.Y + 5);
+                }
             }
         }
 
@@ -192,7 +211,7 @@ namespace Rou
             SetWindowLong(helper.Handle, GWL_EXSTYLE, GetWindowLong(helper.Handle, GWL_EXSTYLE) | WS_EX_NOACTIVATE);
         }
         #endregion
-        
+
 
         public void ShowAtPosition(double x, double y)
         {
@@ -240,7 +259,7 @@ namespace Rou
             path.Data = geo;
             path.Fill = fill;
             path.Stroke = stroke;
-            path.Opacity = 0.4;
+            path.Opacity = C.RouSectorOpacity;
 
             return path;
         }
@@ -255,7 +274,7 @@ namespace Rou
         private void Path_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
             var path = (Path)sender;
-            path.Opacity = 0.4;
+            path.Opacity =C.RouSectorOpacity;
             (path.Data as PathGeometry).Figures[0].Segments[0].IsStroked = false;
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = false;
             currentAction = null;
@@ -264,13 +283,14 @@ namespace Rou
         private void Path_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             var path = (Path)sender;
-            path.Opacity = 0.7;
+            path.Opacity = C.RouSectorActiveOpacity;
             (path.Data as PathGeometry).Figures[0].Segments[0].IsStroked = true;
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = true;
             currentAction = path.Tag as Action;
         }
 
-        public void Exit() {
+        public void Exit()
+        {
             hookEx.unhook();
             notifyIcon.Visible = false;
             Environment.Exit(0);

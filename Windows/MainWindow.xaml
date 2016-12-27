@@ -9,7 +9,7 @@
         Title="MainWindow" Height="350" Width="350" Background="#01000000" WindowStartupLocation="CenterScreen"
         Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" ShowInTaskbar="False" Closing="Window_Closing">
     <Window.Effect>
-        <DropShadowEffect Opacity="0.8" Color="Gray" ShadowDepth="1"/>
+        <DropShadowEffect Opacity="0.6" Color="DimGray" ShadowDepth="1" BlurRadius="7"/>
     </Window.Effect>
     
     <Window.Resources>

@@ -38,6 +38,7 @@ namespace Rou.Windows
         private void I_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             SelectedIcon.Icon = (sender as MaterialIcon).Icon;
+            SelectedIconName.Content = SelectedIcon.Icon.ToString();
         }
 
         private void I_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
@@ -53,6 +54,11 @@ namespace Rou.Windows
         private void Grid_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private void MaterialIcon_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            Close();
         }
     }
 }

@@ -18,7 +18,8 @@
         <Grid Background="#FF383838" Grid.Row="0" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
             <mi:MaterialIcon x:Name="SelectedIcon" Icon="ic_access_alarms" Foreground="White" Width="50" Height="50" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
             <mi:MaterialIcon Icon="ic_check" Foreground="White" Height="20" VerticalAlignment="Top" Margin="0,10,35,0" HorizontalAlignment="Right" Width="20"/>
-            <mi:MaterialIcon Icon="ic_close" Foreground="White" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0"/>
+            <mi:MaterialIcon Icon="ic_close" Foreground="White" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" MouseLeftButtonDown="MaterialIcon_MouseLeftButtonDown"/>
+            <Label x:Name="SelectedIconName" Content="icon" HorizontalAlignment="Left" Margin="65,10,0,0" VerticalAlignment="Top" Foreground="White"/>
         </Grid>
         <ScrollViewer Padding="10,0,0,0" PanningMode="VerticalOnly" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Background="#FF646464" Grid.Row="1" FocusVisualStyle="{x:Null}">
             <WrapPanel x:Name="Container" Margin="0" VerticalAlignment="Top" >
