@@ -27,7 +27,7 @@ namespace Rou
         private Storyboard StoryboardIn;
         private Storyboard StoryboardOut;
 
-        public bool ShowText { get; private set; } = true;
+        public bool ShowText { get; private set; } = false;
 
         public MainWindow()
         {
