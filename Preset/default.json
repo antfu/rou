@@ -1,4 +1,7 @@
 ﻿{
+  "configs": {
+    "hotkeys": "Apps"
+  },
   "actions": [
     {
       "type": "keyboard",

@@ -38,8 +38,11 @@ namespace Rou
 
         public void init()
         {
-            foreach (var key in C.HotKey)
-                hookEx.HookedKeys.Add(key);
+            var loader = new JsonLoader(@"Preset\default.json");
+            loader.Load();
+            actions = loader.Actions;
+            
+            hookEx.HookedKeys.Add(loader.Configs.Hotkey);
             hookEx.KeyDown += HookEx_KeyDown;
             hookEx.KeyUp += HookEx_KeyUp;
 
@@ -67,20 +70,6 @@ namespace Rou
             cavans.Height = C.RouRaduis * 2;
             Width = C.RouRaduis * 2 + C.RouPadding * 2;
             Height = C.RouRaduis * 2 + C.RouPadding * 2;
-
-            /*
-            actions = new List<Action>();
-            actions.Add(new KeyboardAction("Pause", MaterialIconType.ic_pause, Keys.MediaPlayPause));
-            actions.Add(new KeyboardAction("Next Track", MaterialIconType.ic_skip_next, Keys.MediaNextTrack));
-            actions.Add(new KeyboardAction("Mute", MaterialIconType.ic_volume_off, Keys.VolumeMute));
-            actions.Add(new KeyboardAction("Task View", MaterialIconType.ic_view_quilt, new List<KeyAction>() {
-                new KeyAction(Keys.LWin, KeyOperation.Down),
-                new KeyAction(Keys.Tab, KeyOperation.Press),
-                new KeyAction(Keys.LWin, KeyOperation.Up)
-            }, 100));
-            actions.Add(new KeyboardAction("Prev Track", MaterialIconType.ic_skip_previous, Keys.MediaPreviousTrack));
-            */
-            actions = JsonLoader.LoadAction(@"Preset\default.json");
 
             StoryboardIn = this.TryFindResource("StoryboardIn") as Storyboard;
             StoryboardOut = this.TryFindResource("StoryboardOut") as Storyboard;

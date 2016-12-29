@@ -11,20 +11,44 @@ using Newtonsoft.Json.Linq;
 
 namespace Rou.Utils
 {
-    static class JsonLoader
+    class JsonLoader
     {
+        public string Path { get; private set; }
+        public List<Action> Actions { get; private set; }
+        public Configuration Configs { get; private set; }
+
+        public JsonLoader(string path)
+        {
+            Path = path;
+        }
+
+        #region Static Methods
         public static dynamic ParseFile(String path)
         {
             return JObject.Parse(File.ReadAllText(path));
         }
-
-        public static List<Action> LoadAction(String path = "default.json")
+        private static Keys StringToKey(string str)
         {
-            dynamic obj = ParseFile(path);
-            var objActions = obj.actions;
-            var actions = new List<Action>();
+            return (Keys)Enum.Parse(typeof(Keys), str, true);
+        }
+        private static MaterialIconType StringToIcon(string str)
+        {
+            return (MaterialIconType)Enum.Parse(typeof(MaterialIconType), str, true);
+        }
+        #endregion
 
-            foreach (dynamic objAction in objActions)
+        public void Load()
+        {
+            dynamic obj = ParseFile(Path);
+
+            // Load configs
+            Configs = new Configuration();
+            if (obj.configs != null && obj.configs.hotkeys != null)
+                Configs.Hotkey = StringToKey(obj.configs.hotkeys.ToString());
+
+            // Load actions
+            Actions = new List<Action>();
+            foreach (dynamic objAction in obj.actions)
             {
                 Action action = null;
                 try
@@ -34,7 +58,7 @@ namespace Rou.Utils
 
                         string text = objAction.text.ToString();
                         string icon_text = objAction.icon.ToString();
-                        MaterialIconType icon = (MaterialIconType)Enum.Parse(typeof(MaterialIconType), icon_text, true);
+                        MaterialIconType icon = StringToIcon(icon_text);
                         dynamic keys = objAction.keys;
 
                         if (keys is JArray)
@@ -43,7 +67,7 @@ namespace Rou.Utils
                             foreach (dynamic keyaction in keys)
                             {
                                 var p = keyaction.ToString().Split(' ');
-                                var key = (Keys)Enum.Parse(typeof(Keys), p[1], true);
+                                var key = StringToKey(p[1]);
                                 KeyOperation op = KeyOperation.Press;
                                 if (p[0] == "P")
                                     op = KeyOperation.Press;
@@ -57,7 +81,7 @@ namespace Rou.Utils
                         }
                         else
                         {
-                            action = new KeyboardAction(text, icon, (Keys)Enum.Parse(typeof(Keys), keys.ToString(), true));
+                            action = new KeyboardAction(text, icon, StringToKey(keys.ToString()));
                         }
 
                     }
@@ -73,9 +97,8 @@ namespace Rou.Utils
                 }
 
                 if (action != null)
-                    actions.Add(action);
+                    Actions.Add(action);
             }
-            return actions;
         }
     }
 }

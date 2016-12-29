@@ -9,7 +9,6 @@ namespace Rou.Utils
 {
     static class C
     {
-        public readonly static List<Keys> HotKey = new List<Keys>{ Keys.Apps };
         public const double RouRaduis = 100;
         public const double RouInnderRaduis = 30;
         public const double RouPadding = 40;
