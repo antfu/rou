@@ -47,11 +47,12 @@
     <Grid x:Name="RouContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid.LayoutTransform>
             <TransformGroup>
-                <ScaleTransform x:Name="WindowScaleTrans" ScaleX="0.3" ScaleY="0.3"/>
-                <RotateTransform x:Name="WindowRotateTrans" Angle="-40"/>
+                <ScaleTransform x:Name="WindowScaleTrans"/>
+                <RotateTransform x:Name="WindowRotateTrans"/>
             </TransformGroup>
         </Grid.LayoutTransform>
         <Ellipse x:Name="rouBack" Fill="#00464646" HorizontalAlignment="Center" Height="300" Margin="0"  VerticalAlignment="Center" Width="300" Cursor="SizeAll"/>
         <Canvas x:Name="cavans" HorizontalAlignment="Center" Height="300" Margin="0" VerticalAlignment="Center" Width="300"></Canvas>
+        <Label x:Name="debugLabel" Content="Debug" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Background="#7F000000" Foreground="White" FontSize="10" Padding="5,2,5,3"/>
     </Grid>
 </Window>

@@ -93,6 +93,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Actions\KeyboardAction.cs" />
+    <Compile Include="Controls\Sector.xaml.cs">
+      <DependentUpon>Sector.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -106,9 +109,14 @@
     <Compile Include="Utils\KeyboardHook.cs" />
     <Compile Include="Utils\MouseCursor.cs" />
     <Compile Include="Utils\MouseSimulator.cs" />
+    <Compile Include="Utils\API.cs" />
     <Compile Include="Windows\IconSelectWindow.xaml.cs">
       <DependentUpon>IconSelectWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\Sector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -26,6 +26,7 @@ namespace Rou
         private Action currentAction = null;
         private Storyboard StoryboardIn;
         private Storyboard StoryboardOut;
+        private readonly IntPtr hWnd;
 
         public bool ShowText { get; private set; } = false;
 
@@ -34,6 +35,7 @@ namespace Rou
             IsHitTestVisible = false;
             InitializeComponent();
             init();
+            hWnd = new WindowInteropHelper(this).EnsureHandle();
         }
 
         public void init()
@@ -41,7 +43,7 @@ namespace Rou
             var loader = new JsonLoader(@"Preset\default.json");
             loader.Load();
             actions = loader.Actions;
-            
+
             hookEx.HookedKeys.Add(loader.Configs.Hotkey);
             hookEx.KeyDown += HookEx_KeyDown;
             hookEx.KeyUp += HookEx_KeyUp;
@@ -73,23 +75,80 @@ namespace Rou
 
             StoryboardIn = this.TryFindResource("StoryboardIn") as Storyboard;
             StoryboardOut = this.TryFindResource("StoryboardOut") as Storyboard;
-            initSector();
+            initSector(actions);
             StoryboardOut.Begin();
             StoryboardOut.Pause();
             StoryboardIn.Begin();
             StoryboardIn.Pause();
         }
 
-        private void HookEx_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-            if (currentAction?.HoverRelease() != false)
-                HideRou();
-            e.Handled = true;
-        }
 
+        private IntPtr CurrenthWnd;
         private void HookEx_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            ShowRou();
+            if (!_shown)
+            {
+                this.Hide();
+                CurrenthWnd = API.GetWindowFromPoint();
+                this.Show();
+                ShowRou();
+                if (CurrenthWnd != IntPtr.Zero)
+                {
+                    var text = API.GetWindowText(CurrenthWnd);
+                    var name = API.GetWindowName(CurrenthWnd);
+                    //System.Windows.MessageBox.Show(text + "  " + name);
+                    var processName = System.IO.Path.GetFileName(name);
+                    debugLabel.Content = processName;
+
+                    // TODO: Add to configs
+                    if (processName == "chrome.exe")
+                    {
+                        initSector(new List<Action>()
+                        {
+                            new KeyboardAction("New", MaterialIconType.ic_add, new List<KeyAction>() {
+                                new KeyAction(Keys.Control, KeyOperation.Down),
+                                new KeyAction(Keys.T, KeyOperation.Press),
+                                new KeyAction(Keys.Control, KeyOperation.Up),
+                            }),
+                             new KeyboardAction("Next", MaterialIconType.ic_arrow_forward, new List<KeyAction>() {
+                                new KeyAction(Keys.Control, KeyOperation.Down),
+                                new KeyAction(Keys.PageDown, KeyOperation.Press),
+                                new KeyAction(Keys.Control, KeyOperation.Up),
+                            }),
+                             new KeyboardAction("Reopen", MaterialIconType.ic_restore, new List<KeyAction>() {
+                                new KeyAction(Keys.Control, KeyOperation.Down),
+                                new KeyAction(Keys.Shift, KeyOperation.Down),
+                                new KeyAction(Keys.T, KeyOperation.Press),
+                                new KeyAction(Keys.Shift, KeyOperation.Up),
+                                new KeyAction(Keys.Control, KeyOperation.Up),
+                            }),
+                              new KeyboardAction("Prev", MaterialIconType.ic_arrow_back, new List<KeyAction>() {
+                                new KeyAction(Keys.Control, KeyOperation.Down),
+                                new KeyAction(Keys.PageUp, KeyOperation.Press),
+                                new KeyAction(Keys.Control, KeyOperation.Up),
+                            }),
+                        });
+                    }
+                    else
+                    {
+                        initSector(actions);
+                    }
+
+                }
+            }
+            e.Handled = true;
+        }
+        private void HookEx_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            if (currentAction != null)
+            {
+                if (CurrenthWnd != IntPtr.Zero && CurrenthWnd != hWnd)
+                    API.InvokeWindow(CurrenthWnd);
+                if (currentAction.HoverRelease() != false)
+                    HideRou();
+            }
+            else
+                HideRou();
             e.Handled = true;
         }
 
@@ -98,7 +157,7 @@ namespace Rou
             notifyIcon.Visible = true;
         }
 
-        public void ShowRou()
+        public bool ShowRou()
         {
             if (!_shown)
             {
@@ -114,7 +173,9 @@ namespace Rou
                 StoryboardOut.Seek(TimeSpan.FromMilliseconds(1), TimeSeekOrigin.BeginTime);
                 Opacity = 1;
                 IsHitTestVisible = true;
+                return true;
             }
+            return false;
         }
 
         public void HideRou()
@@ -129,7 +190,7 @@ namespace Rou
         }
 
 
-        public void initSector()
+        public void initSector(List<Action> actions)
         {
             cavans.Children.Clear();
 
@@ -181,25 +242,13 @@ namespace Rou
         }
 
 
-        #region Noactivate Window
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_NOACTIVATE = 0x08000000;
-
-        [DllImport("user32.dll")]
-        public static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll")]
-        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
 
-            //Set the window style to noactivate.
-            WindowInteropHelper helper = new WindowInteropHelper(this);
-            SetWindowLong(helper.Handle, GWL_EXSTYLE, GetWindowLong(helper.Handle, GWL_EXSTYLE) | WS_EX_NOACTIVATE);
+            API.SetWindowNoactive(this);
         }
-        #endregion
 
 
         public void ShowAtPosition(double x, double y)
@@ -263,7 +312,7 @@ namespace Rou
         private void Path_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
             var path = (Path)sender;
-            path.Opacity =C.RouSectorOpacity;
+            path.Opacity = C.RouSectorOpacity;
             (path.Data as PathGeometry).Figures[0].Segments[0].IsStroked = false;
             (path.Data as PathGeometry).Figures[0].Segments[2].IsStroked = false;
             currentAction = null;
