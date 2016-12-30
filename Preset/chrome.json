@@ -1,0 +1,66 @@
+﻿{
+  "actions": [
+    {
+      "type": "keyboard",
+      "text": "New",
+      "icon": "ic_add",
+      "keys": [
+        "D Control",
+        "P T",
+        "U Control"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "Close",
+      "icon": "ic_close",
+      "keys": [
+        "D Control",
+        "P W",
+        "U Control"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "Next",
+      "icon": "ic_arrow_forward",
+      "keys": [
+        "D Control",
+        "P PageDown",
+        "U Control"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "Reopen",
+      "icon": "ic_restore",
+      "keys": [
+        "D Control",
+        "D Shift",
+        "P T",
+        "U Shift",
+        "U Control"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "Back",
+      "icon": "ic_undo",
+      "keys": [
+        "D Alt",
+        "P Left",
+        "U Alt"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "Prev",
+      "icon": "ic_arrow_back",
+      "keys": [
+        "D Control",
+        "P PageUp",
+        "U Control"
+      ]
+    }
+  ]
+}

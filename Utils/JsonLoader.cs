@@ -13,13 +13,16 @@ namespace Rou.Utils
 {
     class JsonLoader
     {
-        public string Path { get; private set; }
-        public List<Action> Actions { get; private set; }
+        public string FolderDir { get; private set; }
+        public List<Action> DefaultActions { get; private set; }
         public Configuration Configs { get; private set; }
+
+        private Dictionary<string, List<Action>> _actionCache;
 
         public JsonLoader(string path)
         {
-            Path = path;
+            FolderDir = path;
+            _actionCache = new Dictionary<string, List<Action>>();
         }
 
         #region Static Methods
@@ -37,18 +40,29 @@ namespace Rou.Utils
         }
         #endregion
 
-        public void Load()
+        public List<Action> LoadActionsForApp(string appname) {
+            if (_actionCache.ContainsKey(appname))
+                return _actionCache[appname];
+            else
+            {
+                var path = Path.Combine(FolderDir, appname + ".json");
+                if (File.Exists(path))
+                {
+                    dynamic obj = ParseFile(path);
+                    var actions = LoadActions(obj.actions);
+                    _actionCache.Add(appname, actions);
+                    return actions;
+                }
+                else {
+                    return DefaultActions;
+                }
+            }
+        }
+
+        private static List<Action> LoadActions(dynamic actionobj)
         {
-            dynamic obj = ParseFile(Path);
-
-            // Load configs
-            Configs = new Configuration();
-            if (obj.configs != null && obj.configs.hotkeys != null)
-                Configs.Hotkey = StringToKey(obj.configs.hotkeys.ToString());
-
-            // Load actions
-            Actions = new List<Action>();
-            foreach (dynamic objAction in obj.actions)
+            var actions = new List<Action>();
+            foreach (dynamic objAction in actionobj)
             {
                 Action action = null;
                 try
@@ -97,8 +111,24 @@ namespace Rou.Utils
                 }
 
                 if (action != null)
-                    Actions.Add(action);
+                    actions.Add(action);
             }
+
+            return actions;
+        }
+
+        public void Load()
+        {
+            var path = Path.Combine(FolderDir, "default.json");
+            dynamic obj = ParseFile(path);
+
+            // Load configs
+            Configs = new Configuration();
+            if (obj.configs != null && obj.configs.hotkeys != null)
+                Configs.Hotkey = StringToKey(obj.configs.hotkeys.ToString());
+
+            // Load actions
+            DefaultActions = LoadActions(obj.actions);
         }
     }
 }

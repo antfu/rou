@@ -27,6 +27,7 @@ namespace Rou
         private Storyboard StoryboardIn;
         private Storyboard StoryboardOut;
         private readonly IntPtr hWnd;
+        private JsonLoader loader;
 
         public bool ShowText { get; private set; } = false;
 
@@ -40,9 +41,9 @@ namespace Rou
 
         public void init()
         {
-            var loader = new JsonLoader(@"Preset\default.json");
+            loader = new JsonLoader(@"Preset");
             loader.Load();
-            actions = loader.Actions;
+            actions = loader.DefaultActions;
 
             hookEx.HookedKeys.Add(loader.Configs.Hotkey);
             hookEx.KeyDown += HookEx_KeyDown;
@@ -97,43 +98,11 @@ namespace Rou
                     var text = API.GetWindowText(CurrenthWnd);
                     var name = API.GetWindowName(CurrenthWnd);
                     //System.Windows.MessageBox.Show(text + "  " + name);
-                    var processName = System.IO.Path.GetFileName(name);
+                    var processName = System.IO.Path.GetFileNameWithoutExtension(name);
                     debugLabel.Content = processName;
 
                     // TODO: Add to configs
-                    if (processName == "chrome.exe")
-                    {
-                        initSector(new List<Action>()
-                        {
-                            new KeyboardAction("New", MaterialIconType.ic_add, new List<KeyAction>() {
-                                new KeyAction(Keys.Control, KeyOperation.Down),
-                                new KeyAction(Keys.T, KeyOperation.Press),
-                                new KeyAction(Keys.Control, KeyOperation.Up),
-                            }),
-                             new KeyboardAction("Next", MaterialIconType.ic_arrow_forward, new List<KeyAction>() {
-                                new KeyAction(Keys.Control, KeyOperation.Down),
-                                new KeyAction(Keys.PageDown, KeyOperation.Press),
-                                new KeyAction(Keys.Control, KeyOperation.Up),
-                            }),
-                             new KeyboardAction("Reopen", MaterialIconType.ic_restore, new List<KeyAction>() {
-                                new KeyAction(Keys.Control, KeyOperation.Down),
-                                new KeyAction(Keys.Shift, KeyOperation.Down),
-                                new KeyAction(Keys.T, KeyOperation.Press),
-                                new KeyAction(Keys.Shift, KeyOperation.Up),
-                                new KeyAction(Keys.Control, KeyOperation.Up),
-                            }),
-                              new KeyboardAction("Prev", MaterialIconType.ic_arrow_back, new List<KeyAction>() {
-                                new KeyAction(Keys.Control, KeyOperation.Down),
-                                new KeyAction(Keys.PageUp, KeyOperation.Press),
-                                new KeyAction(Keys.Control, KeyOperation.Up),
-                            }),
-                        });
-                    }
-                    else
-                    {
-                        initSector(actions);
-                    }
-
+                    initSector(loader.LoadActionsForApp(processName));
                 }
             }
             e.Handled = true;
