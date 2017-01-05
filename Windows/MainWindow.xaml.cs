@@ -41,6 +41,13 @@ namespace Rou
 
         public void init()
         {
+
+#if DEBUG
+            debugLabel.Visibility = Visibility.Visible;
+#else
+            debugLabel.Visibility = Visibility.Collapsed;
+#endif
+
             loader = new JsonLoader(@"Preset");
             loader.Load();
             actions = loader.DefaultActions;
@@ -97,11 +104,10 @@ namespace Rou
                 {
                     var text = API.GetWindowText(CurrenthWnd);
                     var name = API.GetWindowName(CurrenthWnd);
-                    //System.Windows.MessageBox.Show(text + "  " + name);
                     var processName = System.IO.Path.GetFileNameWithoutExtension(name);
+#if DEBUG
                     debugLabel.Content = processName;
-
-                    // TODO: Add to configs
+#endif
                     initSector(loader.LoadActionsForApp(processName));
                 }
             }

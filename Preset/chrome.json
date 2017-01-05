@@ -44,22 +44,22 @@
     },
     {
       "type": "keyboard",
-      "text": "Back",
-      "icon": "ic_undo",
-      "keys": [
-        "D Alt",
-        "P Left",
-        "U Alt"
-      ]
-    },
-    {
-      "type": "keyboard",
       "text": "Prev",
       "icon": "ic_arrow_back",
       "keys": [
         "D Control",
         "P PageUp",
         "U Control"
+      ]
+    },
+    {
+      "type": "keyboard",
+      "text": "Back",
+      "icon": "ic_undo",
+      "keys": [
+        "D Alt",
+        "P Left",
+        "U Alt"
       ]
     }
   ]
