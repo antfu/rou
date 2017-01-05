@@ -165,25 +165,43 @@ namespace Rou.Utils
 #if DEBUG
                 //Debug.WriteLine("X:" + lParam.X + "  Y:" + lParam.Y + " 1:" + lParam.flags + " w:" + wParam);
 #endif
-   
+
+                KeyEventArgs kea = null;
                 switch (wParam)
                 {
                     case WM_MBUTTONDOWN:
-                        KeyDown(this, new KeyEventArgs(Keys.MButton));
+                        if (HookedKeys.Contains(Keys.MButton))
+                        {
+                            kea = new KeyEventArgs(Keys.MButton);
+                            KeyDown(this, kea);
+                        }
                         break;
                     case WM_MBUTTONUP:
-                        KeyUp(this, new KeyEventArgs(Keys.MButton));
+                        if (HookedKeys.Contains(Keys.MButton))
+                        {
+                            kea = new KeyEventArgs(Keys.MButton);
+                            KeyUp(this, kea);
+                        }
                         break;
                     case WM_LBUTTONDOWN:
-                        KeyDown(this, new KeyEventArgs(Keys.LButton));
+                        if (HookedKeys.Contains(Keys.LButton))
+                        {
+                            kea = new KeyEventArgs(Keys.LButton);
+                            KeyDown(this, kea);
+                        }
                         break;
                     case WM_LBUTTONUP:
-                        KeyUp(this, new KeyEventArgs(Keys.LButton));
+                        if (HookedKeys.Contains(Keys.LButton))
+                        {
+                            kea = new KeyEventArgs(Keys.LButton);
+                            KeyUp(this, kea);
+                        }
                         break;
-
-                    // TODO: Add more mouse keys
+                        // TODO: Add more mouse keys
                 }
 
+                if (kea?.Handled == true)
+                    return 1;
             }
             return CallNextHookExMouse(mhook, code, wParam, ref lParam);
         }
