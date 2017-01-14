@@ -12,9 +12,15 @@ namespace Rou.Utils
         #region Constants
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
+        private const uint WsExTransparent = 0x20;
+        private const int GwlExstyle = (-20);
         #endregion
 
         #region API Imports
+        [DllImport("user32", EntryPoint = "SetWindowLong")]
+        private static extern uint SetWindowLong(IntPtr hwnd, int nIndex, uint dwNewLong);
+        [DllImport("user32", EntryPoint = "GetWindowLong")]
+        private static extern uint GetWindowLong(IntPtr hwnd, int nIndex);
         [DllImport("user32.dll")]
         private static extern IntPtr WindowFromPoint(Point p);
         [DllImport("user32.dll")]
@@ -41,8 +47,6 @@ namespace Rou.Utils
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, object lParam);
         [DllImport("user32.dll")]
         public static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-        [DllImport("user32.dll")]
-        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
         #endregion
 
 
@@ -93,6 +97,17 @@ namespace Rou.Utils
             CloseHandle(hProcess);
 
             return text.ToString();
+        }
+
+        public static void SetWindowTrans(IntPtr hWnd)
+        {
+            uint extendedStyle = GetWindowLong(hWnd, GwlExstyle);
+            SetWindowLong(hWnd, GwlExstyle, extendedStyle | WsExTransparent);
+        }
+        public static void UnsetWindowTrans(IntPtr hWnd)
+        {
+            uint extendedStyle = GetWindowLong(hWnd, GwlExstyle);
+            SetWindowLong(hWnd, GwlExstyle, extendedStyle & ~WsExTransparent);
         }
     }
 }

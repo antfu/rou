@@ -38,6 +38,7 @@ namespace Rou
             InitializeComponent();
             init();
             hWnd = new WindowInteropHelper(this).EnsureHandle();
+            API.SetWindowTrans(hWnd);
         }
 
         public void init()
@@ -138,6 +139,7 @@ namespace Rou
             if (!_shown)
             {
                 _shown = true;
+                API.UnsetWindowTrans(hWnd);
                 Opacity = 0;
                 ShowByMouse();
                 currentAction = null;
@@ -158,6 +160,7 @@ namespace Rou
         {
             if (_shown)
             {
+                API.SetWindowTrans(hWnd);
                 IsHitTestVisible = false;
                 _shown = false;
                 StoryboardOut.Resume();
