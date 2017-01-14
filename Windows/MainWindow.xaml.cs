@@ -13,6 +13,7 @@ using MaterialIcons;
 using Rou.Utils;
 using Rou.Actions;
 using Rou.Windows;
+using System.Diagnostics;
 
 namespace Rou
 {
@@ -228,8 +229,13 @@ namespace Rou
 
         public void ShowAtPosition(double x, double y)
         {
-            Left = x - C.RouRaduis - C.RouPadding;
-            Top = y - C.RouRaduis - C.RouPadding;
+            // Get the dpi of the screen
+            Matrix m = PresentationSource.FromVisual(System.Windows.Application.Current.MainWindow).CompositionTarget.TransformToDevice;
+            double dx = m.M11;
+            double dy = m.M22;
+            
+            Left = x / dx - C.RouRaduis - C.RouPadding;
+            Top = y /dy - C.RouRaduis - C.RouPadding;
         }
 
         public void ShowByMouse()
