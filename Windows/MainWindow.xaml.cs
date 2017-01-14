@@ -65,7 +65,8 @@ namespace Rou
             notifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu();
             var options = new System.Windows.Forms.MenuItem { Text = "Options" };
             var exit = new System.Windows.Forms.MenuItem { Text = "Exit" };
-            notifyIcon.ContextMenu.MenuItems.Add(options);
+            // TODO: Temporary disabled option menu 
+            // notifyIcon.ContextMenu.MenuItems.Add(options);
             notifyIcon.ContextMenu.MenuItems.Add(exit);
             options.Click += (s, e) =>
             {
@@ -236,9 +237,9 @@ namespace Rou
             Matrix m = PresentationSource.FromVisual(System.Windows.Application.Current.MainWindow).CompositionTarget.TransformToDevice;
             double dx = m.M11;
             double dy = m.M22;
-            
+
             Left = x / dx - C.RouRaduis - C.RouPadding;
-            Top = y /dy - C.RouRaduis - C.RouPadding;
+            Top = y / dy - C.RouRaduis - C.RouPadding;
         }
 
         public void ShowByMouse()
