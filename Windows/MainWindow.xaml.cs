@@ -14,6 +14,7 @@ using Rou.Utils;
 using Rou.Actions;
 using Rou.Windows;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Rou
 {
@@ -22,6 +23,7 @@ namespace Rou
         public List<Action> actions;
 
         private bool _shown = false;
+        private bool _disabled = false;
         private KeyboardHookEx hookEx = new KeyboardHookEx();
         private NotifyIcon notifyIcon = null;
         private Action currentAction = null;
@@ -29,6 +31,11 @@ namespace Rou
         private Storyboard StoryboardOut;
         private readonly IntPtr hWnd;
         private JsonLoader loader;
+
+        private System.Windows.Forms.MenuItem menuEnable;
+        private System.Windows.Forms.MenuItem menuExit;
+        private System.Windows.Forms.MenuItem menuVersion;
+        private System.Windows.Forms.MenuItem menuOption;
 
         public bool ShowText { get; private set; } = false;
 
@@ -63,18 +70,38 @@ namespace Rou
             notifyIcon.BalloonTipTitle = "Rou";
             notifyIcon.BalloonTipText = "";
             notifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu();
-            var options = new System.Windows.Forms.MenuItem { Text = "Options" };
-            var exit = new System.Windows.Forms.MenuItem { Text = "Exit" };
+            string assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            menuVersion = new System.Windows.Forms.MenuItem { Text = "v" + assemblyVersion };
+            menuVersion.Enabled = false;
+            menuEnable = new System.Windows.Forms.MenuItem { Text = "Enable" };
+            menuEnable.Checked = true;
+            menuOption = new System.Windows.Forms.MenuItem { Text = "Options" };
+            menuExit = new System.Windows.Forms.MenuItem { Text = "Exit" };
             // TODO: Temporary disabled option menu 
             // notifyIcon.ContextMenu.MenuItems.Add(options);
-            notifyIcon.ContextMenu.MenuItems.Add(exit);
-            options.Click += (s, e) =>
+            notifyIcon.ContextMenu.MenuItems.Add(menuVersion);
+            notifyIcon.ContextMenu.MenuItems.Add(menuEnable);
+            notifyIcon.ContextMenu.MenuItems.Add(menuExit);
+            menuOption.Click += (s, e) =>
             {
                 (new IconSelectWindow()).Show();
             };
-            exit.Click += (s, e) =>
+            menuExit.Click += (s, e) =>
             {
                 Exit();
+            };
+            menuEnable.Click += (s, e) =>
+            {
+                if (menuEnable.Checked)
+                {
+                    menuEnable.Checked = false;
+                    Disable();
+                }
+                else
+                {
+                    menuEnable.Checked = true;
+                    Enable();
+                }
             };
 
             rouBack.Width = C.RouRaduis * 2;
@@ -91,6 +118,11 @@ namespace Rou
             StoryboardOut.Pause();
             StoryboardIn.Begin();
             StoryboardIn.Pause();
+
+            _disabled = true;
+            Enable();
+            _shown = true;
+            HideRou();
         }
 
 
@@ -135,9 +167,22 @@ namespace Rou
             notifyIcon.Visible = true;
         }
 
+        public void Enable()
+        {
+            _disabled = false;
+            hookEx.hook();
+        }
+
+        public void Disable()
+        {
+            _disabled = true;
+            hookEx.unhook();
+            HideRou();
+        }
+
         public bool ShowRou()
         {
-            if (!_shown)
+            if (!_disabled && !_shown)
             {
                 _shown = true;
                 API.UnsetWindowTrans(hWnd);
@@ -314,7 +359,7 @@ namespace Rou
 
         public void Exit()
         {
-            hookEx.unhook();
+            Disable();
             notifyIcon.Visible = false;
             Environment.Exit(0);
         }
