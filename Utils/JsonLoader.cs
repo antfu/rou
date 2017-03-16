@@ -40,6 +40,11 @@ namespace Rou.Utils
         }
         #endregion
 
+        public bool HasApp(String appname) {
+            var path = Path.Combine(FolderDir, appname + ".json");
+            return _actionCache.ContainsKey(appname) || File.Exists(path);
+        }
+
         public List<Action> LoadActionsForApp(string appname) {
             if (_actionCache.ContainsKey(appname))
                 return _actionCache[appname];
@@ -50,6 +55,8 @@ namespace Rou.Utils
                 {
                     dynamic obj = ParseFile(path);
                     var actions = LoadActions(obj.actions);
+                    foreach (Action action in actions)
+                        action.Active = true;
                     _actionCache.Add(appname, actions);
                     return actions;
                 }

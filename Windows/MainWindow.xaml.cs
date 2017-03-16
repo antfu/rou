@@ -15,6 +15,7 @@ using Rou.Actions;
 using Rou.Windows;
 using System.Diagnostics;
 using System.Reflection;
+using System.Threading;
 
 namespace Rou
 {
@@ -31,11 +32,16 @@ namespace Rou
         private Storyboard StoryboardOut;
         private readonly IntPtr hWnd;
         private JsonLoader loader;
+        private bool hoveredOnSubfuncLabel;
 
         private System.Windows.Forms.MenuItem menuEnable;
         private System.Windows.Forms.MenuItem menuExit;
         private System.Windows.Forms.MenuItem menuVersion;
         private System.Windows.Forms.MenuItem menuOption;
+
+
+        public Dictionary<string, List<UIElement>> sectorCache;
+        public List<UIElement> defaultSectorCache;
 
         public bool ShowText { get; private set; } = false;
 
@@ -60,6 +66,7 @@ namespace Rou
             loader = new JsonLoader(@"Preset");
             loader.Load();
             actions = loader.DefaultActions;
+            sectorCache = new Dictionary<string, List<UIElement>>();
 
             hookEx.HookedKeys.Add(loader.Configs.Hotkey);
             hookEx.KeyDown += HookEx_KeyDown;
@@ -114,6 +121,7 @@ namespace Rou
             StoryboardIn = this.TryFindResource("StoryboardIn") as Storyboard;
             StoryboardOut = this.TryFindResource("StoryboardOut") as Storyboard;
             initSector(actions);
+            defaultSectorCache = cacheSector();
             StoryboardOut.Begin();
             StoryboardOut.Pause();
             StoryboardIn.Begin();
@@ -134,7 +142,6 @@ namespace Rou
                 this.Hide();
                 CurrenthWnd = API.GetWindowFromPoint();
                 this.Show();
-                ShowRou();
                 if (CurrenthWnd != IntPtr.Zero)
                 {
                     var text = API.GetWindowText(CurrenthWnd);
@@ -143,8 +150,19 @@ namespace Rou
 #if DEBUG
                     debugLabel.Content = processName;
 #endif
-                    initSector(loader.LoadActionsForApp(processName));
+                    initSector(processName);
+
+                    if (loader.HasApp(processName))
+                    {
+                        subfuncsLabel.Visibility = Visibility.Visible;
+                        subfuncsLabel.Content = FirstLetterToUpper(processName);
+                    }
+                    else
+                    {
+                        subfuncsLabel.Visibility = Visibility.Collapsed;
+                    }
                 }
+                ShowRou();
             }
             e.Handled = true;
         }
@@ -215,6 +233,47 @@ namespace Rou
         }
 
 
+        public List<UIElement> cacheSector()
+        {
+            List<UIElement> children = new List<UIElement>();
+            foreach (UIElement c in cavans.Children)
+            {
+                children.Add(c);
+            }
+            return children;
+        }
+
+        public void cacheSector(string name) {
+            sectorCache.Add(name, cacheSector());
+        }
+
+        public void applySectorCache(List<UIElement> children) {
+            cavans.Children.Clear();
+            foreach (var c in children)
+                cavans.Children.Add(c);
+        }
+
+        public bool applySectorCache(string name)
+        {
+            if (sectorCache.ContainsKey(name))
+            {
+                List<UIElement> children = sectorCache[name];
+                applySectorCache(children);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public void initSector(string processName)
+        {
+            //if (!applySectorCache(processName)) {
+                var actions = loader.LoadActionsForApp(processName);
+                initSector(actions);
+            //cacheSector(processName);
+            //}
+        }
+
         public void initSector(List<Action> actions)
         {
             cavans.Children.Clear();
@@ -227,7 +286,10 @@ namespace Rou
             for (int i = 0; i < count; i++)
             {
                 var action = actions[i];
-                var path = CreateSector(C.RouRaduis, C.RouInnderRaduis, offest + sectorTheta * i, offest + sectorTheta * (i + 1), C.RouBackBrush, C.RouStrokeBrush);
+
+                var strokeColor = action.Active && false ? C.RouActiveStrokeBrush : C.RouStrokeBrush;
+
+                Path path = CreateSector(C.RouRaduis, C.RouInnderRaduis, offest + sectorTheta * i, offest + sectorTheta * (i + 1), C.RouBackBrush, strokeColor, 1);
                 var icon = action.Icon;
                 cavans.Children.Add(path);
                 cavans.Children.Add(icon);
@@ -298,7 +360,7 @@ namespace Rou
             return new Point(Math.Cos(theta) * r, Math.Sin(theta) * r);
         }
 
-        private Path CreateSector(double outerRadius, double innerRadius, double fromDegree, double toDegree, Brush fill, Brush stroke)
+        private Path CreateSector(double outerRadius, double innerRadius, double fromDegree, double toDegree, Brush fill, Brush stroke, double strokeThickness)
         {
             if (fromDegree > toDegree)
             {
@@ -327,6 +389,7 @@ namespace Rou
             path.Data = geo;
             path.Fill = fill;
             path.Stroke = stroke;
+            path.StrokeThickness = strokeThickness;
             path.Opacity = C.RouSectorOpacity;
 
             return path;
@@ -367,6 +430,36 @@ namespace Rou
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
+        }
+
+        private void subfuncsLabel_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            hoveredOnSubfuncLabel = true;
+            EasyTimer.SetTimeout(() =>
+            {
+                if (hoveredOnSubfuncLabel)
+                {
+                    initSector("_default");
+                    subfuncsLabel.Content = "Default";
+                }
+                return null;
+            }, 400);
+        }
+
+        private void subfuncsLabel_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            hoveredOnSubfuncLabel = false;
+        }
+
+        public string FirstLetterToUpper(string str)
+        {
+            if (str == null)
+                return null;
+
+            if (str.Length > 1)
+                return char.ToUpper(str[0]) + str.Substring(1);
+
+            return str.ToUpper();
         }
     }
 }

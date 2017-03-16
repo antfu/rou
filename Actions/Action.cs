@@ -21,6 +21,7 @@ namespace Rou
         private MaterialIconType _icon;
 
         public ActionType Type { get; protected set; }
+        public bool Active { get; set; }
         public string Text
         {
             get

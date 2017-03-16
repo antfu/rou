@@ -17,6 +17,7 @@ namespace Rou.Utils
         public const double RouSectorActiveOpacity = 1;
         public readonly static Brush RouBackBrush = new SolidColorBrush(Color.FromArgb(100, 90, 90, 90));
         public readonly static Brush RouStrokeBrush = new SolidColorBrush(Color.FromArgb(200, 128, 128, 128));
+        public readonly static Brush RouActiveStrokeBrush = new SolidColorBrush(Color.FromArgb(255, 121, 189, 143));
         public readonly static Brush RouActionIconBrush = new SolidColorBrush(Colors.White);
         public readonly static Brush RouActionIconTextBrush = new SolidColorBrush(Color.FromArgb(128, 255, 255, 255));
     }
