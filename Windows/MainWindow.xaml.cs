@@ -21,7 +21,7 @@ namespace Rou
 {
     public partial class MainWindow : Window
     {
-        public List<Action> actions;
+        private ActionsCollection actions;
 
         private bool _shown = false;
         private bool _disabled = false;
@@ -31,7 +31,7 @@ namespace Rou
         private Storyboard StoryboardIn;
         private Storyboard StoryboardOut;
         private readonly IntPtr hWnd;
-        private JsonLoader loader;
+        private Configuration config;
         private bool hoveredOnSubfuncLabel;
 
         private System.Windows.Forms.MenuItem menuEnable;
@@ -63,12 +63,15 @@ namespace Rou
             debugLabel.Visibility = Visibility.Collapsed;
 #endif
 
-            loader = new JsonLoader(@"Preset");
-            loader.Load();
-            actions = loader.DefaultActions;
+            var presetReleaser = new PresetReleaser();
+            presetReleaser.ReleaseAll();
+
+            config = new Configuration(@"configs");
+            config.Load();
+            actions = config.DefaultActions;
             sectorCache = new Dictionary<string, List<UIElement>>();
 
-            hookEx.HookedKeys.Add(loader.Configs.Hotkey);
+            hookEx.HookedKeys.Add(config.Hotkey);
             hookEx.KeyDown += HookEx_KeyDown;
             hookEx.KeyUp += HookEx_KeyUp;
 
@@ -85,7 +88,7 @@ namespace Rou
             menuOption = new System.Windows.Forms.MenuItem { Text = "Options" };
             menuExit = new System.Windows.Forms.MenuItem { Text = "Exit" };
             // TODO: Temporary disabled option menu 
-            // notifyIcon.ContextMenu.MenuItems.Add(options);
+            notifyIcon.ContextMenu.MenuItems.Add(menuOption);
             notifyIcon.ContextMenu.MenuItems.Add(menuVersion);
             notifyIcon.ContextMenu.MenuItems.Add(menuEnable);
             notifyIcon.ContextMenu.MenuItems.Add(menuExit);
@@ -152,7 +155,7 @@ namespace Rou
 #endif
                     initSector(processName);
 
-                    if (loader.HasApp(processName))
+                    if (config.HasApp(processName))
                     {
                         subfuncsLabel.Visibility = Visibility.Visible;
                         subfuncsLabel.Content = FirstLetterToUpper(processName);
@@ -268,7 +271,7 @@ namespace Rou
         public void initSector(string processName)
         {
             //if (!applySectorCache(processName)) {
-                var actions = loader.LoadActionsForApp(processName);
+                var actions = config.LoadActionsForApp(processName);
                 initSector(actions);
             //cacheSector(processName);
             //}
