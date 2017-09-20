@@ -10,12 +10,12 @@ A customizable function wheel for mouse.
 ### Download 
 [Releases](https://github.com/antfu/rou/releases)
 
-** DISCLAIMER: This project is still under developing... **
+**DISCLAIMER: This project is still under developing...**
 
-### Confiration
+### Configuration
 Currently you can only change options/configs by manually editing the json files. The options UI will be implement later.
 
-[Confiration Guid](./Preset)
+[Configuration Guide](./Preset)
 
 ## License
 MIT
